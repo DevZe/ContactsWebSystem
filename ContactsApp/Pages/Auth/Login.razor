@@ -12,10 +12,16 @@
 </head>
 <title>Sign-In</title>
 
-   <EditForm Model="LoginCredentialsInput" OnValidSubmit="SignIn">
+@if (IsLoading)
+{
+    <p>Loading...</p>
+}else
+{
+
+    <h4 class="text-center">Sign In</h4>
+      <EditForm Model="LoginCredentialsInput" OnValidSubmit="SignIn">
             <DataAnnotationsValidator />
             
-
             <div class="container">
                 <label for="uname"><b>Username</b></label>
                 <input type="text" @bind-value="LoginCredentialsInput.Username" placeholder="Enter Username" name="uname" required>
@@ -39,9 +45,9 @@
            
         </div>
        
-   </EditForm>
+      </EditForm>
 
-
+}
 
 @code {
 
@@ -83,10 +89,11 @@
     private SignUpModel? RegistrationInput = new SignUpModel()!;
     private List<string> Errors = new List<string>();
 
-    private bool IsSubmitted,IsRegistered,IsLoggedIn;
+    private bool IsLoading,IsRegistered,IsLoggedIn;
     private string token = string.Empty;
     private string? returnUrl;
     bool lastLoginFailed;
+
     [CascadingParameter]
     private Task AuthenticationState { get; set; }
     [Parameter]
@@ -96,12 +103,25 @@
         get { return returnUrl; }
         set { returnUrl = value; }
     }
-    private string Username; 
+    private string Username;
 
     /// <summary>
     /// Sign in method for logging the user in
     /// by passing the input values to the back end service
     /// </summary>
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        
+        AuthenticationState? state = await CustomAuthProvider.GetAuthenticationStateAsync();
+        if (state != null && state.User.Identity.IsAuthenticated)
+        {
+            NavManager.NavigateTo("contacts-manager");
+        }
+        
+    }
+    
+
     private async Task SignIn()
     {
         Errors.Clear();
@@ -111,24 +131,25 @@
         {
             try
             {
-                IsSubmitted = true;
+                IsLoading = true;
                 //call the login service
                 AuthenticatedUserModel? authedUser = await authEndPoint.LoginUser(new LoginModel { Email = LoginCredentialsInput.Username, Password = LoginCredentialsInput.Password });
                 lastLoginFailed = authedUser.accessToken == null;
                 if (!lastLoginFailed)
                 {
+                    
                     await _sessionStorage.SetItemAsStringAsync("token",authedUser.accessToken);
-                    await CustomAuthProvider.GetAuthenticationStateAsync();
+                    
+                    IsLoggedIn = true;
                     StateHasChanged();
-                    NavManager.NavigateTo("contacts-manager",true);
+                    NavManager.NavigateTo("contacts-manager");
                 }
-               
+                IsLoading = false;
             }
             catch (Exception ex)
             {
                 Errors.Add("Invalid Credentials please try again");
                 LoginCredentialsInput = new SignInModel();
-                IsSubmitted = false;
                 IsLoggedIn = false;
                 Errors.Add(ex.Message);
                 //throw new Exception(ex.Message);

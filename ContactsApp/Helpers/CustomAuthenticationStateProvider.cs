@@ -27,15 +27,10 @@ namespace ContactsApp.Helpers
         {
 
             var identity = new ClaimsIdentity();
-            if (!string.IsNullOrEmpty(_authuserModel.accessToken))
+            var token = await _sessionStorageService.GetItemAsync<string>("token");
+            if (!string.IsNullOrEmpty(_authuserModel.accessToken) || !string.IsNullOrEmpty(token))
             {
-
-                identity = new ClaimsIdentity(JwtParser.ParseJwtToken(_authuserModel.accessToken), "jwt");
-            }
-            else
-            {
-                var token = await _sessionStorageService.GetItemAsync<string>("token");
-                identity = new ClaimsIdentity(JwtParser.ParseJwtToken(token), "jwt");
+                identity = new ClaimsIdentity(JwtParser.ParseJwtToken(_authuserModel.accessToken ?? token), "jwt");
             }
             var user = new ClaimsPrincipal(identity);
             AuthenticationState? state = new AuthenticationState(user);

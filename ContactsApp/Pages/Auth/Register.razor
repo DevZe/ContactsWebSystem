@@ -4,6 +4,9 @@
 @inject IAuthenticationService _authEndPoint
 @inject NavigationManager NavManager
 @attribute [AllowAnonymous]
+<head>
+    <link rel="stylesheet" href="css/login.css" />
+</head>
 @if (Errors.Count > 0)
 {
     @foreach(string error in Errors)
@@ -12,35 +15,39 @@
     }
 }
 
-@if (!IsRegistered)
+@if (IsLoading)
 {
-    @if (!IsSubmitted)
-    {
-        <div class="container container-fluid m-auto shadow rounded">
-            <h3>Register</h3>
+    <p>Loading...</p>
+}
+else
+{
+    <div class="container container-fluid m-auto shadow rounded">
+            <h3 class="text-center">Sign Up</h3>
             <EditForm Model="Input" OnValidSubmit="ClickSubmitRegister">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
-                <div class="row mb-3">
-                    <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
-                    <div class="col-sm-10">
-                        <InputText type="email" @bind-Value="Input.Email" class="form-control" id="inputEmail" />
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
-                    <div class="col-sm-10">
-                        <InputText type="password" @bind-Value="Input.Password" class="form-control" id="inputPassword" />
-                    </div>
-                </div>
+                
+                <div class="container">
 
-                <div class="row mb-3">
-                    <label for="inputConfirmPassword" class="col-sm-2 col-form-label">Confirm Password</label>
-                    <div class="col-sm-10">
-                        <InputText type="password" id="inputConfirmPassword" @bind-Value="Input.ConfirmPassword" class="form-control" />
+                    <label for="uname"><b>Username</b></label>
+                    <input type="text" @bind-value="Input.Email" placeholder="Enter Username" name="uname" required>
 
-                    </div>
+                    <label for="psw"><b>Password</b></label>
+                    <input type="password" @bind-value="Input.Password" placeholder="Enter Password" name="psw" required>
+                    <label for="confirmPsw"><b>ConfirmPassword</b></label>
+                    <input type="password" @bind-value="Input.ConfirmPassword" placeholder="Confirm Password" name="confirmPsw" required>
+                    <button type="submit">Login</button>
+
+
+
                 </div>
+                @if (Errors != null)
+                {
+                    @foreach (var error in Errors)
+                    {
+                        <p class="text-danger">@error</p>
+                    }
+                }
 
                 @if (Errors!= null && Errors.Count > 0)
                 {
@@ -51,24 +58,17 @@
 
                 }
 
-                <button type="submit" class="btn btn-primary">Sign Up</button>
-                <br />
-                <a class="link-primary m-auto p-2" @onclick="ToSignIn">Sign In</a>
+
+            <div class="container" style="background-color:#f1f1f1">
+                <button type="button" @onclick="SignIn" class="signupbtn">Sign In</button>
+
+            </div>
+                
             </EditForm>
         </div>
-    }
-    else
-    {
-        <div class="jumbotron">
-            <p>
-                You have registered, please check your emails for a confirmation. Thank you.
-            </p>
-           
-        </div>
-    }
-   
+  
 }
-else
+@if(IsRegistered)
 {
     <p>
         You have registered, please to login. Thank you. 
@@ -79,7 +79,7 @@ else
     private InputModel Input = new InputModel();
     List<string> Errors = new List<string>();
     private bool IsRegistered;
-    private bool IsSubmitted;
+    private bool IsLoading;
     //Register input dto model 
     private class InputModel
     {
@@ -108,25 +108,26 @@ else
         {
             try
             {
+                IsLoading = true;
                 IsRegistered = await _authEndPoint.Register(new RegisterModel { Email = Input.Email, Password = Input.Password });
                 await InvokeAsync(StateHasChanged);
                 if (IsRegistered)
                 {
+                    IsLoading = false;
                     NavManager.NavigateTo("login");
                 }
+                IsLoading = false;
             }
             catch (Exception ex)
             {
-
-                Errors.Add(ex.Message);
-                IsSubmitted = false;
+                Errors.Add("Sorry, there was an error there registering, please");
             }
 
         }
 
     }
  
-    void ToSignIn()
+    void SignIn()
     {
         NavManager.NavigateTo("login");
     }
