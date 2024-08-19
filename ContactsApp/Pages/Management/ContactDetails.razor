@@ -1,12 +1,19 @@
 ﻿@page "/contact-details"
-@using ContactsAppLibrary.Services.EndPoints
 @using ContactsAppLibrary.Services.Models
+
 @inject IContactsEndPoint _contactsEndPoint
+@attribute [Authorize]
 
 <head>
     <link rel="stylesheet" href="css/login.css" />
 </head>
 
+@if(IsLoading && Contact == null)
+{
+    <p>Loading...</p>
+}
+else
+{
 <div class="row sticky-top fixed-position bg-light" >
     <div class="col-4">
 
@@ -75,22 +82,30 @@
 
         </EditForm>
                 
-                
+}   
                 
 
 
 @code {
-    [Parameter]
+    [SupplyParameterFromQuery(Name="id")]
     public int ContactId { get; set; }
     private ContactsModel Contact = new ContactsModel();
     private List<string> Errors = new List<string>();
+    private bool IsLoading;
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            IsLoading = true;
             if (ContactId > 0)
             {
+
                 Contact = await _contactsEndPoint.GetContact(ContactId);
+                if(Contact != null && Contact.Name != null)
+                {
+                    IsLoading = false;
+                }
             }
 
         }catch (Exception ex)

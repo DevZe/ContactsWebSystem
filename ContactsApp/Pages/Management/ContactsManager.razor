@@ -17,6 +17,7 @@
 @inject NavigationManager NavMan
 @inject IContactsEndPoint _contactsEndPoint
 
+@attribute [Authorize]
 
 <head>
     <link rel="stylesheet" href="css/manager.css" />
@@ -149,7 +150,7 @@ else
     //View for editing
     void View(ContactsModel model)
     {
-        NavMan.NavigateTo($"contact-details?id={model.Id}",true);
+        NavMan.NavigateTo($"contact-details?id={model.Id}");
         //NavMan.NavigateTo( NavMan.GetUriWithQueryParameter("contact-details",model.Id));
     }
 
