@@ -73,7 +73,7 @@
     public int ContactId { get; set; }
     private ContactsModel Contact = new ContactsModel();
     private List<string> Errors = new List<string>();
-    async Task OnInitialiseAsync()
+    async Task OnInitialisedAsync()
     {
         try
         {

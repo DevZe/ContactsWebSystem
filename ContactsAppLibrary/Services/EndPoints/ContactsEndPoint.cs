@@ -52,10 +52,19 @@ namespace ContactsAppLibrary.Services.EndPoints
         //Get A single Contact By Id
         public async Task<ContactsModel> GetContact(int id)
         {
-            ContactsModel contact;
+            ContactsModel contact = new ContactsModel();
             try
             {
-                contact = await _apiClient.ApiClient.GetFromJsonAsync<ContactsModel>($"api/Contacts?Id={id}");
+                if (_authedModel.accessToken != null)
+                {
+                    _apiClient.ApiClient.DefaultRequestHeaders.Clear();
+                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Clear();
+                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("applications/json"));
+                    _apiClient.ApiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_authedModel.accessToken}");
+
+                    contact = await _apiClient.ApiClient.GetFromJsonAsync<ContactsModel>($"api/Contacts?Id={id}");
+                }
+
             }
             catch (Exception ex)
             {
@@ -69,7 +78,16 @@ namespace ContactsAppLibrary.Services.EndPoints
         {
             try
             {
-                var httpResponseMessage = await _apiClient.ApiClient.DeleteAsync($"api/Contacts?Id={id}");
+                if (_authedModel.accessToken != null)
+                {
+                    _apiClient.ApiClient.DefaultRequestHeaders.Clear();
+                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Clear();
+                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("applications/json"));
+                    _apiClient.ApiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_authedModel.accessToken}");
+
+                    var httpResponseMessage = await _apiClient.ApiClient.DeleteAsync($"api/Contacts?id={id}");
+                }
+
             }
             catch (Exception ex)
             {
@@ -80,10 +98,20 @@ namespace ContactsAppLibrary.Services.EndPoints
         //Insert a new Contact
         public async Task<bool> InsertContact(ContactsModel contact)
         {
-
+            HttpResponseMessage result = new HttpResponseMessage();
             try
             {
-                var result = await _apiClient.ApiClient.PostAsJsonAsync("/api/Contacts", contact);
+                if (_authedModel.accessToken != null)
+                {
+                    _apiClient.ApiClient.DefaultRequestHeaders.Clear();
+                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Clear();
+                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("applications/json"));
+                    _apiClient.ApiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_authedModel.accessToken}");
+
+                    result = await _apiClient.ApiClient.PostAsJsonAsync("/api/Contacts", contact);
+
+                }
+
                 if (result.IsSuccessStatusCode)
                 {
                     return true;
@@ -104,7 +132,18 @@ namespace ContactsAppLibrary.Services.EndPoints
         {
             try
             {
-                var result = await _apiClient.ApiClient.PutAsJsonAsync("/api/Contacts", contact);
+                HttpResponseMessage result = new HttpResponseMessage();
+                if (_authedModel.accessToken != null)
+                {
+                    _apiClient.ApiClient.DefaultRequestHeaders.Clear();
+                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Clear();
+                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("applications/json"));
+                    _apiClient.ApiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_authedModel.accessToken}");
+
+                    result = await _apiClient.ApiClient.PutAsJsonAsync("/api/Contacts", contact);
+
+                }
+
                 if (result.IsSuccessStatusCode)
                 {
                     return true;

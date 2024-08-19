@@ -88,7 +88,7 @@
     private Task<AuthenticationState>? authenticationState { get; set; }
     private bool isloggedIn;
     private List<ContactsModel>? Contacts = new List<ContactsModel>();
-    private List<string>? Errors;
+    private List<string>? Errors = new List<string>();
     async Task OnInitialiseAsync()
     {
 
