@@ -6,6 +6,18 @@
 <head>
     <link rel="stylesheet" href="css/login.css" />
 </head>
+
+<div class="row sticky-top fixed-position bg-light" >
+    <div class="col-4">
+
+    </div>
+    <div class="col-4">
+        <button type="submit" class="btn btn-sm btn-primary">Save changes</button>
+    </div>
+    <div class="col-4">
+
+    </div>
+</div>
         <EditForm  Model="Contact" OnValidSubmit="Update">
             <DataAnnotationsValidator />
            
@@ -60,8 +72,7 @@
                 <label for="uname"><b>Country</b></label>
                 <input type="text" @bind-value="Contact.Address.Country" placeholder="Enter Country" name="uname" required>
             </div>
-            <button type="submit" class="btn btn-primary">Save changes</button>
-                    
+
         </EditForm>
                 
                 

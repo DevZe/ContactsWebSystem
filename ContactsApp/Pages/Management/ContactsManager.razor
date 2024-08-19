@@ -86,7 +86,10 @@ else
         }
     </table>
     
-    <button onclick="@(GetContactModelsAsync)"> get contacts</button>
+    @if(Contacts == null)
+    {
+        <button onclick="@(GetContactModelsAsync)"> Get contacts</button>
+    }
 }
 
 
