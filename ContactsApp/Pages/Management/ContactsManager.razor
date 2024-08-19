@@ -31,6 +31,12 @@
     }
 }
 
+@if ((IsLoading || Contacts == null) && !isloggedIn )
+{
+    <p>Loading</p>
+}
+else
+{   
 
     <div>
         <button @onclick="AddContact"><span class="oi oi-plus" aria-hidden="true"></span></button>
@@ -59,11 +65,11 @@
                     <td>
                     @if(contact.Address != null)
                     {
-                       <p>
+                        <p>
                             @contact.Address.StreetNumber;  @contact.Address.StreetName; 
                             @contact.Address.City @contact.Address.Province,
                             @contact.Address.Country @contact.Address.ZipCode
-                       </p>
+                        </p>
                        
                     }
                     
@@ -81,6 +87,8 @@
     </table>
     
     <button onclick="@(GetContactModelsAsync)"> get contacts</button>
+}
+
 
 @code {
 
@@ -89,18 +97,21 @@
     private bool isloggedIn;
     private List<ContactsModel>? Contacts = new List<ContactsModel>();
     private List<string>? Errors = new List<string>();
-    async Task OnInitialiseAsync()
+    private bool IsLoading;
+    protected override async Task OnInitializedAsync()
     {
-
 
         try
         {
+            IsLoading = true;
             await GetContactModelsAsync();
-            var authProvider = await authenticationStateProvider.GetAuthenticationStateAsync();
+
+            var authProvider = await authenticationStateProvider.GetAuthenticationStateAsync();//Not recommending this but working a better way to solve it 100% 
             if (authProvider.User.Identity.IsAuthenticated)
             {
+                IsLoading = false;
                 isloggedIn = true;
-                // await GetContactModelsAsync();
+                 await GetContactModelsAsync();
             }
 
         }catch(Exception ex)
@@ -119,7 +130,7 @@
     {
         try
         {
-            string token = await _sessionStorageService.GetItemAsync<string>("token");
+            string token = await _sessionStorageService.GetItemAsync<string>("token");//retrieve the token from Protected Storage
 
             _authedModel.accessToken = token;
             Contacts = await _contactService.GetContacts();
@@ -132,12 +143,14 @@
         return Contacts;
     }
 
+    //View for editing
     void View(ContactsModel model)
     {
         NavMan.NavigateTo($"contact-details?id={model.Id}",true);
         //NavMan.NavigateTo( NavMan.GetUriWithQueryParameter("contact-details",model.Id));
     }
 
+    //Remove the contact from the db
     async Task Delete(int id)
     {
         try
@@ -151,6 +164,7 @@
 
     }
 
+    //Add a new contact
     void AddContact()
     {
         NavMan.NavigateTo("create",true);

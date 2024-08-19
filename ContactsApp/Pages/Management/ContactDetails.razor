@@ -53,7 +53,7 @@
 
             <div class="container">
                 <label for="uname"><b>Province</b></label>
-                <input type="text" @bind-value="Contact.Address.Province" placeholder="Enter Province" name="uname" required>
+                <input type="text" @bind-value="Contact.Address.Province" placeholder="Enter Province" name="uname"  required>
             </div>
 
             <div class="container">
@@ -73,7 +73,7 @@
     public int ContactId { get; set; }
     private ContactsModel Contact = new ContactsModel();
     private List<string> Errors = new List<string>();
-    async Task OnInitialisedAsync()
+    protected override async Task OnInitializedAsync()
     {
         try
         {

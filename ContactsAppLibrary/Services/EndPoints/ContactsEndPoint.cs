@@ -82,7 +82,7 @@ namespace ContactsAppLibrary.Services.EndPoints
                 {
                     _apiClient.ApiClient.DefaultRequestHeaders.Clear();
                     _apiClient.ApiClient.DefaultRequestHeaders.Accept.Clear();
-                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("applications/json"));
+                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
                     _apiClient.ApiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_authedModel.accessToken}");
 
                     var httpResponseMessage = await _apiClient.ApiClient.DeleteAsync($"api/Contacts?id={id}");
