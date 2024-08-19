@@ -1,0 +1,12 @@
+﻿@using ContactsApp.Pages.Management
+@page "/"
+@attribute [Authorize]
+<PageTitle>Index</PageTitle>
+
+<ContactsManager/>
+
+@code{
+    [CascadingParameter]
+    Task<AuthenticationState>? AuthState { get; set; }
+}
+

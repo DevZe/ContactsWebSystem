@@ -1,0 +1,181 @@
+﻿@page "/contacts-manager"
+@using Blazored.SessionStorage
+@using ContactsApp.Helpers
+@using ContactsAppLibrary.Services.EndPoints
+@using ContactsAppLibrary.Services.Models
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using ContactsAppLibrary.Services.Models.Auth
+
+
+@inject NavigationManager NavManager
+@inject CustomAuthenticationStateProvider authenticationStateProvider
+@inject IContactsEndPoint _contactService
+@inject ISessionStorageService _sessionStorageService
+@inject AuthenticatedUserModel _authedModel;
+@inject NavigationManager NavMan
+@inject IContactsEndPoint _contactsEndPoint
+
+
+<head>
+    <link rel="stylesheet" href="css/manager.css" />
+</head>
+<title>Manager</title>
+
+@if(Errors!=null && Errors.Count() > 0)
+{
+    @foreach(var error in Errors)
+    {
+        <p>@error</p>
+    }
+}
+
+
+    <div>
+        <button @onclick="AddContact"><span class="oi oi-plus" aria-hidden="true"></span></button>
+    </div>
+    <br/>
+    <hr/>
+    <table id="myTable">
+        <tr class="header">
+            <th style="width:60%;">Name</th>
+            <th style="width:40%;">Phone Number</th>
+            <th style="width:40%;">Email</th>
+            <th style="width:100%;">Address</th>
+            <th style="width:10%;"></th>
+            <th style="width:10%;"></th>
+        </tr>
+        @if (Contacts != null && Contacts.Count>0)
+        {
+            
+        
+            @foreach (var contact in Contacts)
+            {
+                <tr>
+                    <td>@contact.Name</td>
+                    <td>@contact.PhoneNumber</td>
+                    <td>@contact.Email</td>
+                    <td>
+                    @if(contact.Address != null)
+                    {
+                       <p>
+                            @contact.Address.StreetNumber;  @contact.Address.StreetName; 
+                            @contact.Address.City @contact.Address.Province,
+                            @contact.Address.Country @contact.Address.ZipCode
+                       </p>
+                       
+                    }
+                    
+                    </td>
+                    <td>
+                        <button @onclick="@(() =>View(contact))" id="edit-btn" class="btn btn-secondary">Edit</button>
+                    </td>
+
+                    <td>
+                        <button  @onclick="@(() =>Delete(contact.Id))" id="delete-btn" class="btn btn-danger">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+    
+    <button onclick="@(GetContactModelsAsync)"> get contacts</button>
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+    private bool isloggedIn;
+    private List<ContactsModel>? Contacts = new List<ContactsModel>();
+    private List<string>? Errors;
+    async Task OnInitialiseAsync()
+    {
+
+
+        try
+        {
+            await GetContactModelsAsync();
+            var authProvider = await authenticationStateProvider.GetAuthenticationStateAsync();
+            if (authProvider.User.Identity.IsAuthenticated)
+            {
+                isloggedIn = true;
+                // await GetContactModelsAsync();
+            }
+
+        }catch(Exception ex)
+        {
+            Errors.Add("Opps! Something went wrong");
+        }
+
+
+
+    }
+
+    /// <summary>
+    /// Get All Contact And Display 
+    /// </summary>
+    public async Task<IList<ContactsModel>> GetContactModelsAsync()
+    {
+        try
+        {
+            string token = await _sessionStorageService.GetItemAsync<string>("token");
+
+            _authedModel.accessToken = token;
+            Contacts = await _contactService.GetContacts();
+
+        }
+        catch (Exception ex)
+        {
+            Errors.Add("Opps! Something is wrong while getting Contacts");
+        }
+        return Contacts;
+    }
+
+    void View(ContactsModel model)
+    {
+        NavMan.NavigateTo($"contact-details?id={model.Id}",true);
+        //NavMan.NavigateTo( NavMan.GetUriWithQueryParameter("contact-details",model.Id));
+    }
+
+    async Task Delete(int id)
+    {
+        try
+        {
+            await _contactsEndPoint.DeleteContact(id); 
+        }catch(Exception ex)
+        {
+            Errors.Add("Opps! There was an error");
+        }
+
+    }
+
+    void AddContact()
+    {
+        NavMan.NavigateTo("create",true);
+    }
+}
+
+<script>
+    function myFunction() {
+      // Declare variables
+      var input, filter, table, tr, td, i, txtValue;
+      input = document.getElementById("myInput");
+      filter = input.value.toUpperCase();
+      table = document.getElementById("myTable");
+      tr = table.getElementsByTagName("tr");
+
+      // Loop through all table rows, and hide those who don't match the search query
+      for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[0];
+        if (td) {
+          txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
+</script>

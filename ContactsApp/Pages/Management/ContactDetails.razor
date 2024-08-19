@@ -1,0 +1,123 @@
+﻿@page "/contact-details/{id}"
+@using ContactsAppLibrary.Services.EndPoints
+@using ContactsAppLibrary.Services.Models
+@inject IContactsEndPoint _contactsEndPoint
+
+<div class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Contact Details title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (Contact != null && Contact.Email!=null)
+                {
+
+
+                    <EditForm  Model="Contact" OnValidSubmit="Update">
+                        <DataAnnotationsValidator />
+                        <div class="imgcontainer">
+                            <img src="img_avatar2.png" alt="Avatar" class="avatar">
+                        </div>
+
+                        <div class="container">
+                            <label for="uname"><b>Name</b></label>
+                            <input type="text" @bind-value="Contact.Name" placeholder="Enter Username" name="uname" required>
+                        </div>
+
+
+
+                        <div class="container">
+                            <label for="uname"><b>Email</b></label>
+                            <input type="text" @bind-value="Contact.Email" placeholder="Enter Username" name="uname" required>
+                        </div>
+
+                        <div class="container">
+                            <label for="uname"><b>Phone Number</b></label>
+                            <input type="text" @bind-value="Contact.PhoneNumber" placeholder="Enter Username" name="uname" required>
+                        </div>
+
+                        <div class="container">
+                            <label for="uname"><b>Street Number</b></label>
+                            <input type="text" @bind-value="Contact.Address.StreetNumber" placeholder="Enter Street Number" name="uname" required>
+                        </div>
+
+                        <div class="container">
+                            <label for="uname"><b>Street Name</b></label>
+                            <input type="text" @bind-value="Contact.Address.StreetName" placeholder="Enter Street Name" name="uname" required>
+                        </div>
+
+                        <div class="container">
+                            <label for="uname"><b>Suburb</b></label>
+                            <input type="text" @bind-value="Contact.Address.Suburb" placeholder="Enter Suburb" name="uname" required>
+                        </div>
+
+                        <div class="container">
+                            <label for="uname"><b>City</b></label>
+                            <input type="text" @bind-value="Contact.Address.City" placeholder="Enter City" name="uname" required>
+                        </div>
+
+                        <div class="container">
+                            <label for="uname"><b>Zip Code</b></label>
+                            <input type="text" @bind-value="Contact.Address.ZipCode" placeholder="Enter UsernZip Codeame" name="uname" required>
+                        </div>
+
+                        <div class="container">
+                            <label for="uname"><b>Province</b></label>
+                            <input type="text" @bind-value="Contact.Address.Province" placeholder="Enter Province" name="uname" required>
+                        </div>
+
+                        <div class="container">
+                            <label for="uname"><b>Country</b></label>
+                            <input type="text" @bind-value="Contact.Address.Country" placeholder="Enter Country" name="uname" required>
+                        </div>
+                    </EditForm>
+                    <p>Contact</p>
+                }
+                <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public int ContactId { get; set; }
+    private ContactsModel Contact = new ContactsModel();
+    private List<string> Errors = new List<string>();
+    async Task OnInitialiseAsync()
+    {
+        try
+        {
+            if (ContactId>0)
+            {
+                Contact = await _contactsEndPoint.GetContact(ContactId);
+            }
+            
+        }catch (Exception ex)
+        {
+            Errors.Add("Error! Sorry, we had and error");
+        }
+       
+    }
+
+    async Task Update()
+    {
+        try
+        {
+            if (Contact!= null)
+            {
+                await _contactsEndPoint.UpdateContact(Contact);
+            }
+         
+        }catch(Exception ex)
+        {
+            Errors.Add("Opps! Something went wrong");
+        }
+    }
+
+}

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ContactsWebApi.Models
+namespace ContactsAppLibrary.Services.Models
 {
-    public class ContactModel
+    public class ContactsModel
     {
         [Key]
         public int Id { get; set; }
@@ -12,7 +12,6 @@ namespace ContactsWebApi.Models
         public string Email { get; set; } = string.Empty;
         [Required]
         public string PhoneNumber { get; set; } = string.Empty;
-        public AddressModel? Address { get; set; }
-
+        public AddressModel? Address { get; set; } = new AddressModel();
     }
 }

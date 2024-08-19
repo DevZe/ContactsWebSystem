@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35208.52
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactsWebApi", "ContactsWebApi\ContactsWebApi.csproj", "{7F942F4A-B003-4B60-B37D-0359C18E6450}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContactsWebApi", "ContactsWebApi\ContactsWebApi.csproj", "{7F942F4A-B003-4B60-B37D-0359C18E6450}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContactsApp", "ContactsApp\ContactsApp.csproj", "{A7E81503-3079-4558-9A87-D62AFDC478B2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ContactsAppLibrary", "ContactsAppLibrary\ContactsAppLibrary.csproj", "{50EC85A7-001E-413B-86C3-17DC5482DCD9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{7F942F4A-B003-4B60-B37D-0359C18E6450}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F942F4A-B003-4B60-B37D-0359C18E6450}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F942F4A-B003-4B60-B37D-0359C18E6450}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7E81503-3079-4558-9A87-D62AFDC478B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7E81503-3079-4558-9A87-D62AFDC478B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7E81503-3079-4558-9A87-D62AFDC478B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7E81503-3079-4558-9A87-D62AFDC478B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50EC85A7-001E-413B-86C3-17DC5482DCD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50EC85A7-001E-413B-86C3-17DC5482DCD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50EC85A7-001E-413B-86C3-17DC5482DCD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50EC85A7-001E-413B-86C3-17DC5482DCD9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

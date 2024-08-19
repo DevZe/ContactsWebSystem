@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ContactsWebApi.Models
+namespace ContactsAppLibrary.Services.Models
 {
     public class AddressModel
     {
@@ -20,6 +20,5 @@ namespace ContactsWebApi.Models
         public string Country { get; set; } = string.Empty;
         [Required]
         public string ZipCode { get; set; } = string.Empty;
-
     }
 }

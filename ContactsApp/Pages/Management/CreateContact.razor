@@ -1,0 +1,88 @@
+﻿@page "/create"
+@using ContactsAppLibrary.Services.EndPoints
+@using ContactsAppLibrary.Services.Models
+@inject IContactsEndPoint _contactEndPoint
+<head>
+    <link rel="stylesheet" href="css/login.css" />
+</head>
+
+<EditForm Model="Contact" OnValidSubmit="Create">
+
+    @if (Error != null)
+    {
+        <p class="text-danger">@Error</p>
+    }
+    <DataAnnotationsValidator />
+    <div class="imgcontainer">
+        <img alt="Avatar" class="avatar">
+    </div>
+
+    <div class="container">
+        <label for="uname"><b>Name</b></label>
+        <input type="text" @bind-value="Contact.Name" placeholder="Enter Username" name="uname" required>
+    </div>
+
+
+
+    <div class="container">
+        <label for="uname"><b>Email</b></label>
+        <input type="text" @bind-value="Contact.Email" placeholder="Enter Username" name="uname" required>
+    </div>
+
+    <div class="container">
+        <label for="uname"><b>Phone Number</b></label>
+        <input type="text" @bind-value="Contact.PhoneNumber" placeholder="Enter Username" name="uname" required>
+    </div>
+
+    <div class="container">
+        <label for="uname"><b>Street Number</b></label>
+        <input type="text" @bind-value="Contact.Address.StreetNumber" placeholder="Enter Street Number" name="uname" required>
+    </div>
+
+    <div class="container">
+        <label for="uname"><b>Street Name</b></label>
+        <input type="text" @bind-value="Contact.Address.StreetName" placeholder="Enter Street Name" name="uname" required>
+    </div>
+
+    <div class="container">
+        <label for="uname"><b>Suburb</b></label>
+        <input type="text" @bind-value="Contact.Address.Suburb" placeholder="Enter Suburb" name="uname" required>
+    </div>
+
+    <div class="container">
+        <label for="uname"><b>City</b></label>
+        <input type="text" @bind-value="Contact.Address.City" placeholder="Enter City" name="uname" required>
+    </div>
+
+    <div class="container">
+        <label for="uname"><b>Zip Code</b></label>
+        <input type="text" @bind-value="Contact.Address.ZipCode" placeholder="Enter UsernZip Codeame" name="uname" required>
+    </div>
+
+    <div class="container">
+        <label for="uname"><b>Province</b></label>
+        <input type="text" @bind-value="Contact.Address.Province" placeholder="Enter Province" name="uname" required>
+    </div>
+
+    <div class="container">
+        <label for="uname"><b>Country</b></label>
+        <input type="text" @bind-value="Contact.Address.Country" placeholder="Enter Country" name="uname" required>
+    </div>
+</EditForm>
+@code {
+    ContactsModel? Contact = new ContactsModel();
+    
+
+    string? Error; 
+    async Task Create()
+    {
+        try
+        {
+            await _contactEndPoint.InsertContact(Contact);
+        }catch(Exception ex)
+        {
+            Error = "Opps! there was an issue";
+        }
+    }
+
+}

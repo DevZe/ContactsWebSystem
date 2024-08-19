@@ -1,10 +1,12 @@
 ﻿using ContactsWebApi.Data;
 using ContactsWebApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContactsWebApi.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ContactsController : ControllerBase
@@ -20,14 +22,17 @@ namespace ContactsWebApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ContactModel>>> GetContacts()
         {
-            return await _context.Contacts.ToListAsync();
+            var contacts = await _context.Contacts.ToListAsync();
+            return contacts;
         }
 
         // GET: api/ContactModels/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ContactModel>> GetContactModel(int id)
         {
-            var contactModel = await _context.Contacts.FindAsync(id);
+            var contactModel = await _context.Contacts
+                        .Include(i => i.Address)
+                        .FirstOrDefaultAsync(i => i.Id == id);
 
             if (contactModel == null)
             {

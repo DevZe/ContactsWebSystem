@@ -1,0 +1,58 @@
+﻿@using Blazored.SessionStorage
+@inherits LayoutComponentBase
+@inject ISessionStorageService _sessionStorage
+@inject CustomAuthenticationStateProvider authenticationStateProvider
+<PageTitle>Contacts App</PageTitle>
+
+<div class="page">
+    
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+
+    
+    
+
+    <main>
+        <AuthorizeView>
+
+            <div class="top-row px-4">
+                <button @onclick="@(logOut)" target="_blank">Log Out</button>
+            </div>
+        </AuthorizeView>
+      
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+@code{
+    [CascadingParameter]
+    Task <AuthenticationState>? AuthState{ get; set; }
+    bool IsLoggeIn;
+    bool Connecting;
+    List<string> Errors;
+    bool IsLoggedIn;
+
+    public async Task OnInitialiseAsync()
+    {
+
+        var state = authenticationStateProvider.GetAuthenticationStateAsync();
+        if ((await state).User.Identity.IsAuthenticated)
+        {
+            IsLoggedIn = true;
+        }
+    }
+
+    async Task logOut()
+    {
+        try
+        {
+            await _sessionStorage.RemoveItemAsync("token");
+        }catch(Exception ex)
+        {
+            Errors.Add("Opps! Could not log you out");
+        }
+    }
+}
+

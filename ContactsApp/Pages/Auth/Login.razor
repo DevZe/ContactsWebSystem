@@ -1,0 +1,149 @@
+﻿@page "/login"
+@using Blazored.SessionStorage
+
+@inject CustomAuthenticationStateProvider CustomAuthProvider
+@inject IAuthenticationService authEndPoint
+@inject NavigationManager NavManager
+@inject AuthenticatedUserModel loggedUser
+@inject IConfiguration _config
+@inject ISessionStorageService _sessionStorage
+<head>
+    <link rel="stylesheet" href="css/login.css" />
+</head>
+<title>Sign-In</title>
+
+   <EditForm Model="LoginCredentialsInput" OnValidSubmit="SignIn">
+            <DataAnnotationsValidator />
+            <div class="imgcontainer">
+                <img src="" alt="Avatar" class="avatar">
+            </div>
+
+            <div class="container">
+                <label for="uname"><b>Username</b></label>
+                <input type="text" @bind-value="LoginCredentialsInput.Username" placeholder="Enter Username" name="uname" required>
+
+                <label for="psw"><b>Password</b></label>
+                <input type="password" @bind-value="LoginCredentialsInput.Password" placeholder="Enter Password" name="psw" required>
+
+                <button type="submit">Login</button>
+                
+            </div>
+        @if(Errors != null)
+        {
+            @foreach(var error in Errors)
+            {
+                <p class="text-danger">@error</p>
+            }
+        }
+
+        <div class="container" style="background-color:#f1f1f1">
+            <button type="button" @onclick="SignUp" class="signupbtn">Sign Up</button>
+            <span class="psw">Forgot <a href="#">password?</a></span>
+        </div>
+       
+   </EditForm>
+
+
+
+@code {
+
+    /// <summary>
+    /// Registration blue print form of inputs 
+    /// </summary>
+    private class SignUpModel
+    {
+        [Required]
+        [DataType(DataType.EmailAddress)]
+        public string? Email { get; set; }
+        [Required]
+        [DataType(DataType.Password)]      
+        public string? Password { get; set; }
+        [Compare("Password")]
+        [DataType(DataType.Password)]
+        public string? ConfirmPassword { get; set; }
+    }
+
+    /// <summary>
+    /// Login Class for the form inputs
+    /// </summary>
+    private class SignInModel
+    {
+        [Required]
+        [DataType(DataType.EmailAddress)]
+        public string? Username { get; set; }
+        [Required]
+        [DataType(DataType.Password)]
+        public string? Password { get; set; }
+    }
+
+    /// <summary>
+    /// Local variables
+    /// </summary>
+    ///
+
+    private SignInModel? LoginCredentialsInput = new SignInModel()!;
+    private SignUpModel? RegistrationInput = new SignUpModel()!;
+    private List<string> Errors = new List<string>();
+
+    private bool IsSubmitted,IsRegistered,IsLoggedIn;
+    private string token = string.Empty;
+    private string? returnUrl;
+    bool lastLoginFailed;
+    [CascadingParameter]
+    private Task AuthenticationState { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string ReturnUrl
+    {
+        get { return returnUrl; }
+        set { returnUrl = value; }
+    }
+    private string Username; 
+
+    /// <summary>
+    /// Sign in method for logging the user in
+    /// by passing the input values to the back end service
+    /// </summary>
+    private async Task SignIn()
+    {
+        Errors.Clear();
+        if (LoginCredentialsInput != null &&
+            LoginCredentialsInput.Username !=null &&
+                LoginCredentialsInput.Password!=null)
+        {
+            try
+            {
+                IsSubmitted = true;
+                //call the login service
+                AuthenticatedUserModel? authedUser = await authEndPoint.LoginUser(new LoginModel { Email = LoginCredentialsInput.Username, Password = LoginCredentialsInput.Password });
+                lastLoginFailed = authedUser.accessToken == null;
+                if (!lastLoginFailed)
+                {
+                    await _sessionStorage.SetItemAsStringAsync("token",authedUser.accessToken);
+                    await CustomAuthProvider.GetAuthenticationStateAsync();
+                    StateHasChanged();
+                    NavManager.NavigateTo("contacts-manager",true);
+                }
+               
+            }
+            catch (Exception ex)
+            {
+                Errors.Add("Invalid Credentials please try again");
+                LoginCredentialsInput = new SignInModel();
+                IsSubmitted = false;
+                IsLoggedIn = false;
+                Errors.Add(ex.Message);
+                //throw new Exception(ex.Message);
+            }
+
+
+        }
+    }
+
+    void SignUp()
+    {
+        NavManager.NavigateTo("register");
+    }
+   
+ }
+

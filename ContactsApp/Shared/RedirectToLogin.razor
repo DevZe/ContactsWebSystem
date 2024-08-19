@@ -1,0 +1,29 @@
+﻿@using ContactsApp.Helpers
+@inject NavigationManager NavManager
+
+@code {
+    [CascadingParameter]
+    private Task<CustomAuthenticationStateProvider>? authenticationState { get; set; }
+    private string? returnUrl;
+
+    [Parameter]
+    public string? ReturnUrl { get { return returnUrl; } set { returnUrl = value; } }
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (string.IsNullOrEmpty(returnUrl))
+        {
+            returnUrl = "";
+        }
+        try
+        {
+            NavManager.NavigateTo($"login?ReturnUrl={returnUrl}", true, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+        }
+
+
+    }
+}
