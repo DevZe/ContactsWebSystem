@@ -2,6 +2,7 @@
 @using ContactsAppLibrary.Services.EndPoints
 @using ContactsAppLibrary.Services.Models
 @inject IContactsEndPoint _contactEndPoint
+@inject NavigationManager NavManager
 <head>
     <link rel="stylesheet" href="css/login.css" />
 </head>
@@ -13,10 +14,7 @@
         <p class="text-danger">@Error</p>
     }
     <DataAnnotationsValidator />
-    <div class="imgcontainer">
-        <img alt="Avatar" class="avatar">
-    </div>
-
+   
     <div class="container">
         <label for="uname"><b>Name</b></label>
         <input type="text" @bind-value="Contact.Name" placeholder="Enter Username" name="uname" required>
@@ -68,17 +66,29 @@
         <label for="uname"><b>Country</b></label>
         <input type="text" @bind-value="Contact.Address.Country" placeholder="Enter Country" name="uname" required>
     </div>
+
+    <br/>
+    <div class="container" style="background-color:#f1f1f1">
+        <button type="submit" class="signupbtn">Create</button>
+        
+    </div>
 </EditForm>
 @code {
     ContactsModel? Contact = new ContactsModel();
-    
 
     string? Error; 
     async Task Create()
     {
         try
         {
-            await _contactEndPoint.InsertContact(Contact);
+            var isCreated = await _contactEndPoint.InsertContact(Contact);
+
+            if (isCreated)
+            {
+                StateHasChanged();
+                NavManager.NavigateTo("contacts-manager", true);
+            }
+           
         }catch(Exception ex)
         {
             Error = "Opps! there was an issue";

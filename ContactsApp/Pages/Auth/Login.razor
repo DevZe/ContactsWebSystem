@@ -14,9 +14,7 @@
 
    <EditForm Model="LoginCredentialsInput" OnValidSubmit="SignIn">
             <DataAnnotationsValidator />
-            <div class="imgcontainer">
-                <img src="" alt="Avatar" class="avatar">
-            </div>
+            
 
             <div class="container">
                 <label for="uname"><b>Username</b></label>
@@ -38,7 +36,7 @@
 
         <div class="container" style="background-color:#f1f1f1">
             <button type="button" @onclick="SignUp" class="signupbtn">Sign Up</button>
-            <span class="psw">Forgot <a href="#">password?</a></span>
+           
         </div>
        
    </EditForm>

@@ -1,4 +1,4 @@
-﻿@page "/contact-details/{id}"
+﻿@page "/contact-details"
 @using ContactsAppLibrary.Services.EndPoints
 @using ContactsAppLibrary.Services.Models
 @inject IContactsEndPoint _contactsEndPoint
@@ -11,10 +11,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                @if (Contact != null && Contact.Email!=null)
-                {
-
-
+               
                     <EditForm  Model="Contact" OnValidSubmit="Update">
                         <DataAnnotationsValidator />
                         <div class="imgcontainer">
@@ -74,8 +71,8 @@
                         </div>
                     </EditForm>
                     <p>Contact</p>
-                }
-                <p>Modal body text goes here.</p>
+                
+                
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -97,12 +94,12 @@
             {
                 Contact = await _contactsEndPoint.GetContact(ContactId);
             }
-            
+
         }catch (Exception ex)
         {
             Errors.Add("Error! Sorry, we had and error");
         }
-       
+
     }
 
     async Task Update()
@@ -112,6 +109,7 @@
             if (Contact!= null)
             {
                 await _contactsEndPoint.UpdateContact(Contact);
+                StateHasChanged();
             }
          
         }catch(Exception ex)
