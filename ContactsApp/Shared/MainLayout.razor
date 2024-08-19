@@ -10,15 +10,15 @@
             <NavMenu />
         </div>
 
-    
-    
 
     <main>
         <AuthorizeView>
-
-            <div class="top-row px-4">
-                <button @onclick="@(logOut)" target="_blank">Log Out</button>
-            </div>
+            <Authorized>
+                <div class="top-row px-4">
+                    <button @onclick="@(logOut)" target="_blank">Log Out</button>
+                </div>
+            </Authorized>
+           
         </AuthorizeView>
       
         <article class="content px-4">
