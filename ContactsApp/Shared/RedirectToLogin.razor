@@ -1,9 +1,6 @@
-﻿@using ContactsApp.Helpers
-@inject NavigationManager NavManager
-
+﻿@inject NavigationManager NavManager
 @code {
-    [CascadingParameter]
-    private Task<CustomAuthenticationStateProvider>? authenticationState { get; set; }
+
     private string? returnUrl;
 
     [Parameter]

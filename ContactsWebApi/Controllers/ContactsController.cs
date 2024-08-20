@@ -42,39 +42,39 @@ namespace ContactsWebApi.Controllers
             return contactModel;
         }
 
-        // PUT: api/ContactModels/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutContactModel(int id, ContactModel contactModel)
-        //{
-        //    if (id != contactModel.Id)
-        //    {
-        //        return BadRequest();
-        //    }
+        //PUT: api/ContactModels/5
 
-        //    _context.Entry(contactModel).State = EntityState.Modified;
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutContactModel(int id, ContactModel contactModel)
+        {
+            if (id != contactModel.Id)
+            {
+                return BadRequest();
+            }
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!ContactModelExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+            _context.Entry(contactModel).State = EntityState.Modified;
 
-        //    return NoContent();
-        //}
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ContactModelExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
 
         // POST: api/ContactModels
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+
         [HttpPost]
         public async Task<ActionResult<ContactModel>> PostContactModel(ContactModel contactModel)
         {
@@ -85,7 +85,7 @@ namespace ContactsWebApi.Controllers
         }
 
         // DELETE: api/ContactModels/5
-        [HttpDelete("{id}")]
+        [HttpDelete]
         public async Task<IActionResult> DeleteContactModel(int id)
         {
             var contactModel = await _context.Contacts.FindAsync(id);

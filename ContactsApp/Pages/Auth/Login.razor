@@ -110,16 +110,7 @@
     /// by passing the input values to the back end service
     /// </summary>
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        
-        AuthenticationState? state = await CustomAuthProvider.GetAuthenticationStateAsync();
-        if (state != null && state.User.Identity.IsAuthenticated)
-        {
-            NavManager.NavigateTo("contacts-manager");
-        }
-        
-    }
+  
     
 
     private async Task SignIn()
@@ -151,6 +142,7 @@
                 Errors.Add("Invalid Credentials please try again");
                 LoginCredentialsInput = new SignInModel();
                 IsLoggedIn = false;
+                IsLoading = false;
                 Errors.Add(ex.Message);
                 //throw new Exception(ex.Message);
             }

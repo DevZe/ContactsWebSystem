@@ -62,7 +62,7 @@ namespace ContactsAppLibrary.Services.EndPoints
                     _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("applications/json"));
                     _apiClient.ApiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_authedModel.accessToken}");
 
-                    contact = await _apiClient.ApiClient.GetFromJsonAsync<ContactsModel>($"api/Contacts?Id={id}");
+                    contact = await _apiClient.ApiClient.GetFromJsonAsync<ContactsModel>($"/api/Contacts?Id={id}");
                 }
 
             }
@@ -82,10 +82,10 @@ namespace ContactsAppLibrary.Services.EndPoints
                 {
                     _apiClient.ApiClient.DefaultRequestHeaders.Clear();
                     _apiClient.ApiClient.DefaultRequestHeaders.Accept.Clear();
-                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
+                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/*+json"));
                     _apiClient.ApiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_authedModel.accessToken}");
 
-                    var httpResponseMessage = await _apiClient.ApiClient.DeleteAsync($"api/Contacts?id={id}");
+                    var httpResponseMessage = await _apiClient.ApiClient.DeleteAsync($"/api/Contacts?Id={id}");
                 }
 
             }

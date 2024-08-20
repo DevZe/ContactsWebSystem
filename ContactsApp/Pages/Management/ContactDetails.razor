@@ -1,14 +1,15 @@
-﻿@page "/contact-details"
+﻿@page "/contact-details/{ContactId:int}"
+@page "/contact-details"
 @using ContactsAppLibrary.Services.Models
-
+@inject CustomAuthenticationStateProvider authenticationStateProvider
 @inject IContactsEndPoint _contactsEndPoint
-@attribute [Authorize]
+
 
 <head>
     <link rel="stylesheet" href="css/login.css" />
 </head>
 
-@if(IsLoading && Contact == null)
+@if(IsLoading)
 {
     <p>Loading...</p>
 }
@@ -87,26 +88,44 @@ else
 
 
 @code {
-    [SupplyParameterFromQuery(Name="id")]
-    public int ContactId { get; set; }
+    
+  
+    
+    [CascadingParameter]
+    public Task<AuthenticationState>? authenticationState { get; set; }
+    private int contactId;
+    [Parameter]
+    public int ContactId
+    {
+        get { return contactId; }
+        set { contactId = value; }
+    }
     private ContactsModel Contact = new ContactsModel();
     private List<string> Errors = new List<string>();
-    private bool IsLoading;
+    private bool IsLoading, isloggedIn;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             IsLoading = true;
-            if (ContactId > 0)
+            if (contactId > 0)
             {
-
-                Contact = await _contactsEndPoint.GetContact(ContactId);
-                if(Contact != null && Contact.Name != null)
+                var authProvider = await authenticationStateProvider.GetAuthenticationStateAsync();//Not recommending this but working a better way to solve it 100%
+                if (authProvider.User.Identity.IsAuthenticated)
                 {
-                    IsLoading = false;
+                    isloggedIn = true;
+
+                    Contact = await _contactsEndPoint.GetContact(contactId);
+                    if (Contact != null && Contact.Name != null)
+                    {
+                        IsLoading = false;
+                    }
                 }
+
+               
             }
+            IsLoading = false;
 
         }catch (Exception ex)
         {

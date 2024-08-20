@@ -17,7 +17,7 @@
 @inject NavigationManager NavMan
 @inject IContactsEndPoint _contactsEndPoint
 
-@attribute [Authorize]
+
 
 <head>
     <link rel="stylesheet" href="css/manager.css" />
@@ -39,8 +39,19 @@
 else
 {   
 
-    <div>
-        <button @onclick="AddContact"><span class="oi oi-plus" aria-hidden="true"></span></button>
+    
+    <div class="row sticky-top fixed-position bg-light p-2">
+      
+        <div class="col-4 m-2">
+          
+                <button @onclick="AddContact"><span class="oi oi-plus" aria-hidden="true"></span></button>
+         
+        </div>
+        <div class="col-4">
+            <input type="text" onchange="myFunction()" id="myInput" placeholder="Search" class="form-group rounded" />
+        </div>
+        <div class="col-4">
+        </div>
     </div>
     <br/>
     <hr/>
@@ -97,7 +108,7 @@ else
 @code {
 
     [CascadingParameter]
-    private Task<AuthenticationState>? authenticationState { get; set; }
+    public Task<AuthenticationState>? authenticationState { get; set; }
     private bool isloggedIn;
     private List<ContactsModel>? Contacts = new List<ContactsModel>();
     private List<string>? Errors = new List<string>();
@@ -113,9 +124,10 @@ else
             var authProvider = await authenticationStateProvider.GetAuthenticationStateAsync();//Not recommending this but working a better way to solve it 100% 
             if (authProvider.User.Identity.IsAuthenticated)
             {
+                await GetContactModelsAsync();
                 IsLoading = false;
                 isloggedIn = true;
-                 await GetContactModelsAsync();
+
             }
             IsLoading = false;
 
@@ -152,8 +164,8 @@ else
     //View for editing
     void View(ContactsModel model)
     {
-        NavMan.NavigateTo($"contact-details?id={model.Id}");
-        //NavMan.NavigateTo( NavMan.GetUriWithQueryParameter("contact-details",model.Id));
+        NavMan.NavigateTo($"contact-details?contactId={model.Id}");
+        //NavMan.NavigateTo(NavMan.GetUriWithQueryParameter("contact-details",model.Id));
     }
 
     //Remove the contact from the db
@@ -161,8 +173,11 @@ else
     {
         try
         {
-            await _contactsEndPoint.DeleteContact(id); 
+            IsLoading = true;
+            await _contactsEndPoint.DeleteContact(id);
+            await GetContactModelsAsync();
             StateHasChanged();
+            IsLoading = false;
         }catch(Exception ex)
         {
             Errors.Add("Opps! There was an error");
