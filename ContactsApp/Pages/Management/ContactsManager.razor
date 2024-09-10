@@ -1,21 +1,19 @@
 ﻿@page "/contacts-manager"
-@using Blazored.SessionStorage
-@using ContactsApp.Helpers
-@using ContactsAppLibrary.Services.EndPoints
-@using ContactsAppLibrary.Services.Models
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Authorization
-@using System.Security.Claims
-@using ContactsAppLibrary.Services.Models.Auth
+
 
 
 @inject NavigationManager NavManager
 @inject CustomAuthenticationStateProvider authenticationStateProvider
 @inject IContactsEndPoint _contactService
-@inject ISessionStorageService _sessionStorageService
-@inject AuthenticatedUserModel _authedModel;
+@inject ILocalStorageService _localStorageService
+@inject AuthenticatedUserModel _authedModel
 @inject NavigationManager NavMan
 @inject IContactsEndPoint _contactsEndPoint
+@inject AuthenticatedUserModel authedUserModel
+@inject ILocalStorageService _localStorage
+
+@implements IAsyncDisposable
+@inject IJSRuntime _jsRunTime
 
 
 
@@ -32,7 +30,7 @@
     }
 }
 
-@if (IsLoading || Contacts == null)
+@if (IsLoading)
 {
     <p>Loading</p>
 }
@@ -48,14 +46,14 @@ else
          
         </div>
         <div class="col-4">
-            <input type="text" onchange="myFunction()" id="myInput" placeholder="Search" class="form-group rounded" />
+            <input type="text" id="searchInput" placeholder="Search" class="form-group rounded" />
         </div>
         <div class="col-4">
         </div>
     </div>
     <br/>
     <hr/>
-    <table id="myTable">
+    <table id="contactsTable">
         <tr class="header">
             <th style="width:60%;">Name</th>
             <th style="width:40%;">Phone Number</th>
@@ -98,21 +96,20 @@ else
         }
     </table>
     
-    @if(Contacts == null)
-    {
-        <button onclick="@(GetContactModelsAsync)"> Get contacts</button>
-    }
+  
 }
 
 
 @code {
 
-    [CascadingParameter]
-    public Task<AuthenticationState>? authenticationState { get; set; }
+
     private bool isloggedIn;
     private List<ContactsModel>? Contacts = new List<ContactsModel>();
     private List<string>? Errors = new List<string>();
     private bool IsLoading;
+    AuthenticationState user;
+
+    private IJSObjectReference contactsModule;
     protected override async Task OnInitializedAsync()
     {
 
@@ -120,45 +117,67 @@ else
         {
             IsLoading = true;
             await GetContactModelsAsync();
-
-            var authProvider = await authenticationStateProvider.GetAuthenticationStateAsync();//Not recommending this but working a better way to solve it 100% 
-            if (authProvider.User.Identity.IsAuthenticated)
-            {
-                await GetContactModelsAsync();
-                IsLoading = false;
-                isloggedIn = true;
-
-            }
             IsLoading = false;
 
         }catch(Exception ex)
         {
+
+            Errors.Add($"Opps! Something went wrong : {ex.Message})");
             isloggedIn = false;
-            Errors.Add("Opps! Something went wrong");
         }
 
 
 
     }
 
-    /// <summary>
-    /// Get All Contact And Display 
-    /// </summary>
-    public async Task<IList<ContactsModel>> GetContactModelsAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+
+            IsLoading = true;
+            await GetContactModelsAsync();
+            isloggedIn = true;
+            IsLoading = false;
+
+
+            contactsModule = await _jsRunTime.InvokeAsync<IJSObjectReference>("import", "/js/list-search.js");
+            await contactsModule.InvokeVoidAsync("addHandlers");
+        }
+
+    }
+
+
+    // <summary>
+    // Get All Contact And Display 
+    // </summary>
+    public async Task GetContactModelsAsync()
     {
         try
         {
-            string token = await _sessionStorageService.GetItemAsync<string>("token");//retrieve the token from Protected Storage
-
-            _authedModel.accessToken = token;
-            Contacts = await _contactService.GetContacts();
-
+            if(user!= null && user.User.Identity.IsAuthenticated)
+            {
+                isloggedIn = true;
+                authedUserModel.accessToken = await _localStorage.GetItem<string>("token");
+                bool lastLoginFailed = authedUserModel.accessToken == null;
+                if(!lastLoginFailed)
+                    Contacts = await _contactService.GetContacts();
+            }
+            else
+            {
+                isloggedIn = true;
+                user = await authenticationStateProvider.GetAuthenticationStateAsync();
+                authedUserModel.accessToken = await _localStorage.GetItem<string>("token");
+                bool lastLoginFailed = authedUserModel.accessToken == null;
+                if (!lastLoginFailed)
+                    Contacts = await _contactService.GetContacts();
+            }
         }
         catch (Exception ex)
         {
-            Errors.Add("Opps! Something is wrong while getting Contacts");
+            Errors.Add($"Opps! Something is wrong while getting Contacts: {ex.Message}");
         }
-        return Contacts;
+       
     }
 
     //View for editing
@@ -175,12 +194,12 @@ else
         {
             IsLoading = true;
             await _contactsEndPoint.DeleteContact(id);
-            await GetContactModelsAsync();
+            Contacts = await _contactService.GetContacts();
             StateHasChanged();
             IsLoading = false;
         }catch(Exception ex)
         {
-            Errors.Add("Opps! There was an error");
+            Errors.Add($"Opps! There was an error {ex.Message}");
         }
 
     }
@@ -190,28 +209,19 @@ else
     {
         NavMan.NavigateTo("create",true);
     }
-}
 
-<script>
-    function myFunction() {
-      // Declare variables
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInput");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTable");
-      tr = table.getElementsByTagName("tr");
-
-      // Loop through all table rows, and hide those who don't match the search query
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[0];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
-      }
+    //Invoke the JS method as a blazor method
+    async Task search()
+    {
+       
     }
-</script>
+    
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (contactsModule is not null)
+        {
+            await contactsModule.DisposeAsync();
+        }
+    }
+}

@@ -15,6 +15,7 @@ namespace ContactsAppLibrary.Services.Auth
         {
             _apiHelper = apiHelper;
             _authedUser = authedUser;
+
         }
 
 
@@ -29,6 +30,7 @@ namespace ContactsAppLibrary.Services.Auth
         {
             try
             {
+
                 if (loginModel.Email != null || loginModel.Password != null)
                 {
                     //authenticate and get the Authenticated user model
@@ -52,21 +54,27 @@ namespace ContactsAppLibrary.Services.Auth
 
 
         //Log the user out
-        //public async Task<bool> LogOut()
-        //{
-        //    if (_authedUser == null) { return true; }
-        //    if (_authedUser != null && _authedUser.Access_Token != null)
-        //    {
-        //        //remove the token
-        //        await _apiHelper.LogOutuser();
-        //        //release variables
-        //        _authedUser.Access_Token = null;
-        //        _authedUser = new AuthenticatedUserModel();
-        //        return true;
+        public async Task<bool> LogOut()
+        {
 
-        //    }
-        //    else { return false; }
-        //}
+
+
+            if (_authedUser == null) { return true; }
+            if (_authedUser != null && _authedUser.accessToken != null)
+            {
+
+                //    _apiHelper.InitializeClient(_authedUser.accessToken);
+
+                //remove the token
+                await _apiHelper.LogOutUser();
+                //release variables
+                _authedUser.accessToken = null;
+                _authedUser = new AuthenticatedUserModel();
+                return true;
+
+            }
+            else { return false; }
+        }
 
         /// <summary>
         /// Register a new user
@@ -102,21 +110,21 @@ namespace ContactsAppLibrary.Services.Auth
         /// <param name="code"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task<bool> ConfirmEmail(string userId, string? code)
-        {
-            try
-            {
-                //Null check
-                if (userId == null || code == null) { return false; }
-                var response = await _apiHelper.ApiClient.PostAsJsonAsync($"auth/confirmemail?userId={userId}&code={code}", new { });
-                return response.IsSuccessStatusCode;
-            }
-            catch (Exception ex)
-            {
+        //public async Task<bool> ConfirmEmail(string userId, string? code)
+        //{
+        //    try
+        //    {
+        //        //Null check
+        //        if (userId == null || code == null) { return false; }
+        //        var response = await _apiHelper.ApiClient.PostAsJsonAsync($"auth/confirmemail?userId={userId}&code={code}", new { });
+        //        return response.IsSuccessStatusCode;
+        //    }
+        //    catch (Exception ex)
+        //    {
 
-                throw new Exception(ex.Message);
-            }
-        }
+        //        throw new Exception(ex.Message);
+        //    }
+        //}
 
     }
 }

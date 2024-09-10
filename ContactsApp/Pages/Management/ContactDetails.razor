@@ -1,40 +1,41 @@
-﻿@page "/contact-details/{ContactId:int}"
-@page "/contact-details"
+﻿@page "/contact-details"
+
 @using ContactsAppLibrary.Services.Models
 @inject CustomAuthenticationStateProvider authenticationStateProvider
 @inject IContactsEndPoint _contactsEndPoint
+@inject NavigationManager NavMan
 
 
 <head>
     <link rel="stylesheet" href="css/login.css" />
 </head>
 
+
+<Popup @ref="popupReference" />
 @if(IsLoading)
 {
     <p>Loading...</p>
 }
 else
 {
-<div class="row sticky-top fixed-position bg-light" >
-    <div class="col-4">
 
-    </div>
-    <div class="col-4">
-        <button type="submit" class="btn btn-sm btn-primary">Save changes</button>
-    </div>
-    <div class="col-4">
-
-    </div>
-</div>
         <EditForm  Model="Contact" OnValidSubmit="Update">
+        <div class="row sticky-top fixed-position bg-light">
+            <div class="col-4">
+                <button class="btn btn-sm btn-dark" @onclick="@(()=> NavMan.NavigateTo("contacts-manager"))">Back to Contacts</button>
+            </div>
+            <div class="col-4">
+                <button type="submit" class="btn btn-sm btn-primary">Save changes</button>
+            </div>
+            <div class="col-4">
+            </div>
+        </div>
             <DataAnnotationsValidator />
-           
+           <ValidationSummary/>
             <div class="container">
                 <label for="uname"><b>Name</b></label>
                 <input type="text" @bind-value="Contact.Name" placeholder="Enter Username" name="uname" required>
             </div>
-
-
 
             <div class="container">
                 <label for="uname"><b>Email</b></label>
@@ -88,43 +89,48 @@ else
 
 
 @code {
-    
-  
-    
-    [CascadingParameter]
-    public Task<AuthenticationState>? authenticationState { get; set; }
-    private int contactId;
+
+
+    [SupplyParameterFromQuery]
     [Parameter]
-    public int ContactId
-    {
-        get { return contactId; }
-        set { contactId = value; }
-    }
+    public int ContactId { get; set; }
+    private Popup popupReference;
     private ContactsModel Contact = new ContactsModel();
     private List<string> Errors = new List<string>();
-    private bool IsLoading, isloggedIn;
+    private bool IsLoading, isloggedIn, IsUpdated;
+    AuthenticationState user;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             IsLoading = true;
-            if (contactId > 0)
+            if (ContactId > 0)
             {
-                var authProvider = await authenticationStateProvider.GetAuthenticationStateAsync();//Not recommending this but working a better way to solve it 100%
-                if (authProvider.User.Identity.IsAuthenticated)
+
+                if (user!=null && user.User.Identity.IsAuthenticated)
+                {
+
+                    Contact = await _contactsEndPoint.GetContact(ContactId);
+                    if (Contact != null && Contact.Name != null)
+                    {
+                        IsLoading = false;
+                    }
+                }
+                else
                 {
                     isloggedIn = true;
-
-                    Contact = await _contactsEndPoint.GetContact(contactId);
+                    user = await authenticationStateProvider.GetAuthenticationStateAsync();
+                    Contact = await _contactsEndPoint.GetContact(ContactId);
                     if (Contact != null && Contact.Name != null)
                     {
                         IsLoading = false;
                     }
                 }
 
-               
+
             }
+
             IsLoading = false;
 
         }catch (Exception ex)
@@ -134,20 +140,33 @@ else
 
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            user = await authenticationStateProvider.GetAuthenticationStateAsync();
+        }
+    }
+
     async Task Update()
     {
         try
         {
             if (Contact!= null)
             {
-                await _contactsEndPoint.UpdateContact(Contact);
-                StateHasChanged();
+                IsLoading = true;
+                IsUpdated = await _contactsEndPoint.UpdateContact(Contact);
+                popupReference.Show($"Great! You succesfully updated  {Contact.Name} Contact details","Update Success");
+                IsLoading = false;
+
             }
-         
+
         }catch(Exception ex)
         {
-            Errors.Add("Opps! Something went wrong");
+            Errors.Add($"Opps! Something went wrong: {ex.Message}");
         }
     }
 
+
+ 
 }

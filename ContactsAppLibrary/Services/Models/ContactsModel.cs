@@ -12,6 +12,10 @@ namespace ContactsAppLibrary.Services.Models
         public string Email { get; set; } = string.Empty;
         [Required]
         public string PhoneNumber { get; set; } = string.Empty;
-        public AddressModel? Address { get; set; } = new AddressModel();
+        public AddressModel? Address { get; set; }
+
+
+
+
     }
 }

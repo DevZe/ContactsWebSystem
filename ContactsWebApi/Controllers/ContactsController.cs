@@ -39,6 +39,7 @@ namespace ContactsWebApi.Controllers
                 return NotFound();
             }
 
+
             return contactModel;
         }
 
@@ -53,6 +54,7 @@ namespace ContactsWebApi.Controllers
             }
 
             _context.Entry(contactModel).State = EntityState.Modified;
+            _context.Entry(contactModel.Address).State = EntityState.Modified;
 
             try
             {
@@ -61,6 +63,10 @@ namespace ContactsWebApi.Controllers
             catch (DbUpdateConcurrencyException)
             {
                 if (!ContactModelExists(id))
+                {
+                    return NotFound();
+                }
+                else if (!AddressModelExists(id))
                 {
                     return NotFound();
                 }
@@ -103,6 +109,11 @@ namespace ContactsWebApi.Controllers
         private bool ContactModelExists(int id)
         {
             return _context.Contacts.Any(e => e.Id == id);
+        }
+
+        private bool AddressModelExists(int id)
+        {
+            return _context.Address.Any(e => e.Id == id);
         }
     }
 }

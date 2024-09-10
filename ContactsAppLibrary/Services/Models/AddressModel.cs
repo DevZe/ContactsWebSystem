@@ -20,5 +20,6 @@ namespace ContactsAppLibrary.Services.Models
         public string Country { get; set; } = string.Empty;
         [Required]
         public string ZipCode { get; set; } = string.Empty;
+
     }
 }

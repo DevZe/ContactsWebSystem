@@ -7,6 +7,7 @@
         Task<string> AuthenticateUser(string username, string password);
 
         void InitializeClient(string token);
+        Task<bool> LogOutUser();
         //Task<bool> LogOutuser();
     }
 }

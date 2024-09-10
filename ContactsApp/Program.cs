@@ -1,4 +1,3 @@
-using Blazored.SessionStorage;
 using ContactsApp.Helpers;
 using ContactsAppLibrary.Services.Auth;
 using ContactsAppLibrary.Services.Auth.ApiHelper;
@@ -12,13 +11,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
+
 builder.Services.AddSingleton<IApiHelper, ApiHelper>();
 builder.Services.AddScoped<AuthenticatedUserModel>();
-builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<CustomAuthenticationStateProvider>();
 
-builder.Services.AddBlazoredSessionStorage();
-builder.Services.AddTransient<IContactsEndPoint, ContactsEndPoint>();
+builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
+builder.Services.AddScoped<IContactsEndPoint, ContactsEndPoint>();
 
 builder.Services.AddAuthorizationCore();
 

@@ -1,50 +1,70 @@
 ﻿@using Blazored.SessionStorage
-@inject ISessionStorageService _sessionStorage
+@inject AuthenticationStateProvider authStateProvider
+@inject IAuthenticationService _authEndpoint
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">ContactsApp</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+
+    <div class="top-row ps-3 navbar navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="">Contacts App</a>
+            <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
     </div>
-</div>
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-people" aria-hidden="true"></span> Manage Contacts
-            </NavLink>
-        </div>
-        
-    </nav>
-</div>
+    <AuthorizeView>
+    <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+        <nav class="flex-column">
+            <div class="nav-item px-3">
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-people" aria-hidden="true"></span> Manage Contacts
-            </NavLink>
-        </div>
-        <AuthorizeView>
-            <Authorized>
+                <NavLink class="nav-link" href="/contact-manager" Match="NavLinkMatch.All">
+                    <span class="oi oi-people" aria-hidden="true"></span> Manage Contacts
+                </NavLink>
+                
+            </div>
+
+        </nav>
+    </div>
+
+    <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+        <nav class="flex-column">
+            <div class="nav-item px-3">
                 <div class="top-row px-4">
                     <button @onclick="@(logOut)" target="_blank">Log Out</button>
                 </div>
-            </Authorized>
+            </div>
 
-        </AuthorizeView>
-    </nav>
-</div>
-
-
+        </nav>
+    </div>
+</AuthorizeView>
 
 @code {
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    bool IsLoggedIn;
+    private AuthenticationState? state;
+
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (state == null)
+        {
+            state = await authStateProvider.GetAuthenticationStateAsync();
+           
+
+            if (state != null && state.User.Identity.IsAuthenticated)
+            {
+                StateHasChanged();
+                IsLoggedIn = true;
+            }
+        }
+        else
+        {
+            IsLoggedIn = true;
+        }
+    }
 
     private void ToggleNavMenu()
     {
@@ -56,11 +76,13 @@
     {
         try
         {
-            await _sessionStorage.RemoveItemAsync("token");
+            //await _sessionStorage.RemoveItemAsync("token");
+            await _authEndpoint.LogOut();
         }
         catch (Exception ex)
         {
             Errors.Add("Opps! Could not log you out");
+            Errors.Add($"System Eror: {ex.Message}");
         }
     }
 }

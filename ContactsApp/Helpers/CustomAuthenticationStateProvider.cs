@@ -1,8 +1,6 @@
-﻿using Blazored.SessionStorage;
-using ContactsAppLibrary.Services.Models.Auth;
+﻿using ContactsAppLibrary.Services.Models.Auth;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
-using System.Text.Json;
 
 namespace ContactsApp.Helpers
 {
@@ -10,15 +8,14 @@ namespace ContactsApp.Helpers
     {
         private readonly AuthenticatedUserModel _authuserModel;
         private IConfiguration _config;
-        string secret = string.Empty;
-        private readonly ISessionStorageService _sessionStorageService;
+        string token = string.Empty;
+        private readonly ILocalStorageService _localStorage;
 
-        public CustomAuthenticationStateProvider(AuthenticatedUserModel authenticatedUser, IConfiguration config, ISessionStorageService sessionStorageService)
+        public CustomAuthenticationStateProvider(AuthenticatedUserModel authenticatedUser, IConfiguration config, ILocalStorageService localStorage)
         {
             _authuserModel = authenticatedUser;
             _config = config;
-            secret = _config.GetValue("JWTSecretKey", "");
-            _sessionStorageService = sessionStorageService;
+            _localStorage = localStorage;
 
         }
 
@@ -27,10 +24,14 @@ namespace ContactsApp.Helpers
         {
 
             var identity = new ClaimsIdentity();
-            var token = await _sessionStorageService.GetItemAsync<string>("token");
-            if (!string.IsNullOrEmpty(_authuserModel.accessToken) || !string.IsNullOrEmpty(token))
+            token = (await _localStorage.GetItem<string>("token")) ?? _authuserModel.accessToken;
+
+            if (token != null)
             {
                 identity = new ClaimsIdentity(JwtParser.ParseJwtToken(_authuserModel.accessToken ?? token), "jwt");
+                await _localStorage.SetItem<string>("token", token);
+                _authuserModel.accessToken = token;
+
             }
             var user = new ClaimsPrincipal(identity);
             AuthenticationState? state = new AuthenticationState(user);
@@ -39,13 +40,7 @@ namespace ContactsApp.Helpers
             return state;
         }
 
-        public static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
-        {
-            var payload = jwt.Split('.')[1];
-            var jsonBytes = ParseBase64WithoutPadding(payload);
-            var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
-            return keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()));
-        }
+
 
         private static byte[] ParseBase64WithoutPadding(string base64)
         {

@@ -101,5 +101,32 @@ namespace ContactsWebApi.Controllers
             }
         }
 
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> LogOutUser()
+        {
+            var user = _signInManager.Context.User;
+            if (_signInManager.Context.User.Identity.IsAuthenticated)
+            {
+                try
+                {
+                    var identityUser = await _userManager.FindByEmailAsync(user.Identity.Name);
+                    // var id = user.FindFirst(u => u.Type.Contains("nameidentifier"))?.Value;
+                    if (!string.IsNullOrEmpty(identityUser.Id))
+                        //_tokenProviderDeleteToken(identityUser.Id);  --userful when stored session tokens are unique identifies
+                        await _signInManager.SignOutAsync();
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+
+            }
+
+            return Ok();
+        }
+
+
     }
 }

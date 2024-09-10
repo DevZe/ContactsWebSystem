@@ -1,12 +1,12 @@
 ﻿@page "/login"
-@using Blazored.SessionStorage
+
 
 @inject CustomAuthenticationStateProvider CustomAuthProvider
 @inject IAuthenticationService authEndPoint
 @inject NavigationManager NavManager
 @inject AuthenticatedUserModel loggedUser
 @inject IConfiguration _config
-@inject ISessionStorageService _sessionStorage
+@inject ILocalStorageService _localStorage
 <head>
     <link rel="stylesheet" href="css/login.css" />
 </head>
@@ -15,11 +15,21 @@
 @if (IsLoading)
 {
     <p>Loading...</p>
+    <hr />
+    @if (Errors != null)
+    {
+        @foreach (var error in Errors)
+        {
+            <p class="text-danger">@error</p>
+        }
+    }
 }else
 {
-
-    <h4 class="text-center">Sign In</h4>
-      <EditForm Model="LoginCredentialsInput" OnValidSubmit="SignIn">
+    <div class="container container-fluid m-auto rounded">
+        <div class="container shadow" style="background-color:lightcyan">
+         <h4 class="text-center">Sign In</h4>
+       </div>
+        <EditForm Model="LoginCredentialsInput" OnValidSubmit="SignIn" class="shadow">
             <DataAnnotationsValidator />
             
             <div class="container">
@@ -29,7 +39,12 @@
                 <label for="psw"><b>Password</b></label>
                 <input type="password" @bind-value="LoginCredentialsInput.Password" placeholder="Enter Password" name="psw" required>
 
-                <button type="submit">Login</button>
+                <div class="row">
+                    <div class="col">
+                        <button type="submit">Login</button>
+                    </div>
+                </div>
+               
                 
             </div>
         @if(Errors != null)
@@ -40,13 +55,13 @@
             }
         }
 
-        <div class="container" style="background-color:#f1f1f1">
+        <div class="container" style="background-color:lightcyan">
             <button type="button" @onclick="SignUp" class="signupbtn">Sign Up</button>
            
         </div>
        
       </EditForm>
-
+    </div>
 }
 
 @code {
@@ -89,7 +104,7 @@
     private SignUpModel? RegistrationInput = new SignUpModel()!;
     private List<string> Errors = new List<string>();
 
-    private bool IsLoading,IsRegistered,IsLoggedIn;
+    private bool IsLoading,IsLoggedIn;
     private string token = string.Empty;
     private string? returnUrl;
     bool lastLoginFailed;
@@ -110,8 +125,8 @@
     /// by passing the input values to the back end service
     /// </summary>
 
-  
-    
+
+
 
     private async Task SignIn()
     {
@@ -128,12 +143,11 @@
                 lastLoginFailed = authedUser.accessToken == null;
                 if (!lastLoginFailed)
                 {
-                    
-                    await _sessionStorage.SetItemAsStringAsync("token",authedUser.accessToken);
-                    
                     IsLoggedIn = true;
+                    await _localStorage.SetItem<string>("token",authedUser.accessToken);
+                    //CustomAuthProvider.AuthenticationStateChanged -= AuthenticationStateChangedHandler;
                     StateHasChanged();
-                    NavManager.NavigateTo("contacts-manager");
+                    NavManager.NavigateTo("/");
                 }
                 IsLoading = false;
             }

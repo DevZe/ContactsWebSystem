@@ -24,10 +24,14 @@ button {
     width: 100%;
 }
 
-    /* Add a hover effect for buttons */
-    button:hover {
-        opacity: 0.8;
+    button[type=submit] {
+       margin:auto;
+        width: 155px;
     }
+/* Add a hover effect for buttons */
+button:hover {
+    opacity: 0.8;
+}
 
 /* Extra style for the cancel button (red) */
 .signupbtn {
@@ -51,6 +55,8 @@ img.avatar {
 /* Add padding to containers */
 .container {
     padding: 16px;
+    border-radius: 35px 25px 0 0;
+    border-radius: 35px 25px 0 0;
 }
 
 /* The "Forgot password" text */

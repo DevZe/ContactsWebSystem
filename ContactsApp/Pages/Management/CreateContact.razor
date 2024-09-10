@@ -3,6 +3,7 @@
 @using ContactsAppLibrary.Services.Models
 @inject IContactsEndPoint _contactEndPoint
 @inject NavigationManager NavManager
+@inject AuthenticationStateProvider authStateProvider
 <head>
     <link rel="stylesheet" href="css/login.css" />
 </head>
@@ -75,20 +76,45 @@
 </EditForm>
 @code {
     ContactsModel? Contact = new ContactsModel();
+    private AuthenticationState user;
+    bool IsLoading;
+    protected override void OnInitialized()
+    {
+        Contact.Address = new AddressModel();
+    }
 
     string? Error; 
     async Task Create()
     {
         try
         {
-            var isCreated = await _contactEndPoint.InsertContact(Contact);
-
-            if (isCreated)
+            if (user != null && user.User.Identity.IsAuthenticated)
             {
-                StateHasChanged();
-                NavManager.NavigateTo("contacts-manager", true);
+
+                IsLoading = true;
+                var isCreated = await _contactEndPoint.InsertContact(Contact);
+
+                if (isCreated)
+                {
+                    IsLoading = false;
+                    StateHasChanged();
+                    NavManager.NavigateTo("contacts-manager", true);
+                }
             }
-           
+            else
+            {
+                IsLoading = true;
+                user = await authStateProvider.GetAuthenticationStateAsync();
+                var isCreated = await _contactEndPoint.InsertContact(Contact);
+
+                if (isCreated)
+                {
+                    IsLoading = false;
+                    StateHasChanged();
+                    NavManager.NavigateTo("contacts-manager", true);
+                }
+            }
+
         }catch(Exception ex)
         {
             Error = "Opps! there was an issue";

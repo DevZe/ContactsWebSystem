@@ -1,23 +1,28 @@
 ﻿using ContactsAppLibrary.Services.Auth.ApiHelper;
 using ContactsAppLibrary.Services.Models;
 using ContactsAppLibrary.Services.Models.Auth;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 //Contact Service To handle api endpint calls
 namespace ContactsAppLibrary.Services.EndPoints
 {
     public class ContactsEndPoint : IContactsEndPoint
     {
-        IApiHelper? _apiHelper;
+
         private readonly IApiHelper _apiClient;
         private readonly AuthenticatedUserModel _authedModel;
         IList<ContactsModel>? services;
+        private ContactsModel contact;
+
+        HttpResponseMessage result;
 
 
-        public ContactsEndPoint(IApiHelper aPIHelper, AuthenticatedUserModel authedModel)
+        public ContactsEndPoint(IApiHelper apiHelper, AuthenticatedUserModel authedModel)
         {
-            _apiClient = aPIHelper;
+            _apiClient = apiHelper;
             _authedModel = authedModel;
+
+
+
         }
         /// <summary>
         /// This method is used to Get a list of Service from the API
@@ -28,17 +33,11 @@ namespace ContactsAppLibrary.Services.EndPoints
         {
             try
             {
-                if (_authedModel.accessToken != null)
+                if (_authedModel != null && _authedModel.accessToken != null)
                 {
-                    _apiClient.ApiClient.DefaultRequestHeaders.Clear();
-                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Clear();
-                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("applications/json"));
-                    _apiClient.ApiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_authedModel.accessToken}");
-
+                    _apiClient.InitializeClient(_authedModel.accessToken);
                     services = await _apiClient.ApiClient.GetFromJsonAsync<List<ContactsModel>>("/api/Contacts");
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -47,24 +46,19 @@ namespace ContactsAppLibrary.Services.EndPoints
             return services.ToList();
         }
 
-
-
         //Get A single Contact By Id
         public async Task<ContactsModel> GetContact(int id)
         {
-            ContactsModel contact = new ContactsModel();
+
             try
             {
-                if (_authedModel.accessToken != null)
+                if (_authedModel != null && _authedModel.accessToken != null)
                 {
-                    _apiClient.ApiClient.DefaultRequestHeaders.Clear();
-                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Clear();
-                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("applications/json"));
-                    _apiClient.ApiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_authedModel.accessToken}");
-
-                    contact = await _apiClient.ApiClient.GetFromJsonAsync<ContactsModel>($"/api/Contacts?Id={id}");
+                    _apiClient.InitializeClient(_authedModel.accessToken);
+                    contact = new ContactsModel();
+                    contact = await _apiClient.ApiClient.GetFromJsonAsync<ContactsModel>($"/api/Contacts/{id}");
                 }
-
+                return contact;
             }
             catch (Exception ex)
             {
@@ -78,16 +72,12 @@ namespace ContactsAppLibrary.Services.EndPoints
         {
             try
             {
-                if (_authedModel.accessToken != null)
+                if (_authedModel != null && _authedModel.accessToken != null)
                 {
-                    _apiClient.ApiClient.DefaultRequestHeaders.Clear();
-                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Clear();
-                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/*+json"));
-                    _apiClient.ApiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_authedModel.accessToken}");
-
+                    result = new HttpResponseMessage();
+                    _apiClient.InitializeClient(_authedModel.accessToken);
                     var httpResponseMessage = await _apiClient.ApiClient.DeleteAsync($"/api/Contacts?Id={id}");
                 }
-
             }
             catch (Exception ex)
             {
@@ -98,28 +88,18 @@ namespace ContactsAppLibrary.Services.EndPoints
         //Insert a new Contact
         public async Task<bool> InsertContact(ContactsModel contact)
         {
-            HttpResponseMessage result = new HttpResponseMessage();
+
             try
             {
-                if (_authedModel.accessToken != null)
+                if (_authedModel != null && _authedModel.accessToken != null)
                 {
-                    _apiClient.ApiClient.DefaultRequestHeaders.Clear();
-                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Clear();
-                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("applications/json"));
-                    _apiClient.ApiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_authedModel.accessToken}");
-
+                    result = new HttpResponseMessage();
+                    _apiClient.InitializeClient(_authedModel.accessToken);
                     result = await _apiClient.ApiClient.PostAsJsonAsync("/api/Contacts", contact);
 
                 }
 
-                if (result.IsSuccessStatusCode)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return result.IsSuccessStatusCode;
             }
             catch (Exception ex)
             {
@@ -132,30 +112,16 @@ namespace ContactsAppLibrary.Services.EndPoints
         {
             try
             {
-                HttpResponseMessage result = new HttpResponseMessage();
-                if (_authedModel.accessToken != null)
-                {
-                    _apiClient.ApiClient.DefaultRequestHeaders.Clear();
-                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Clear();
-                    _apiClient.ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("applications/json"));
-                    _apiClient.ApiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_authedModel.accessToken}");
 
-                    result = await _apiClient.ApiClient.PutAsJsonAsync("/api/Contacts", contact);
-
-                }
-
-                if (result.IsSuccessStatusCode)
+                if (_authedModel != null && _authedModel.accessToken != null)
                 {
-                    return true;
+                    result = new HttpResponseMessage();
+                    result = await _apiClient.ApiClient.PutAsJsonAsync($"/api/Contacts/{contact.Id}", contact);
                 }
-                else
-                {
-                    return false;
-                }
+                return result.IsSuccessStatusCode;
             }
             catch (Exception ex)
             {
-
                 throw new Exception(ex.Message, ex.InnerException);
             }
         }

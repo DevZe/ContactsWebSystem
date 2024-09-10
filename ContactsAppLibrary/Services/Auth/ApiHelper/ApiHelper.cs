@@ -54,7 +54,9 @@ namespace ContactsAppLibrary.Services.Auth.ApiHelper
                 Password = password
             };
 
-            using (HttpResponseMessage httpResponse = await _apiClient.PostAsJsonAsync("api/Authentication/login", data))
+            InitializeClient();
+
+            using (HttpResponseMessage httpResponse = await _apiClient.PostAsJsonAsync("Authentication/login", data))
             {
                 if (httpResponse.IsSuccessStatusCode)
                 {
@@ -71,22 +73,21 @@ namespace ContactsAppLibrary.Services.Auth.ApiHelper
         }
 
 
-        //Log the user out of the system ***cheat!
-        //public async Task<bool> LogOutuser()
-        //{
+        // Log the user out of the system*** cheat!
+        public async Task<bool> LogOutUser()
+        {
+            try
+            {
+                var response = await _apiClient.PostAsJsonAsync("Authentication/logout", new { });
+                _apiClient.Dispose();
+                return response.IsSuccessStatusCode;
 
-        //    try
-        //    {
-        //        var response = await _apiClient.PostAsJsonAsync("auth/logout", new { });
-        //        _apiClient.DefaultRequestHeaders.Clear();
-        //        return response.IsSuccessStatusCode;
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new Exception(ex.Message);
-        //    }
-        //}
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
     }
 }
