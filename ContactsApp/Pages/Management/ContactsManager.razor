@@ -155,23 +155,27 @@ else
     {
         try
         {
+
+            if (user == null)
+            {
+                user = await authenticationStateProvider.GetAuthenticationStateAsync();
+            }
             if(user!= null && user.User.Identity.IsAuthenticated)
             {
                 isloggedIn = true;
-                authedUserModel.accessToken = await _localStorage.GetItem<string>("token");
-                bool lastLoginFailed = authedUserModel.accessToken == null;
-                if(!lastLoginFailed)
+                //authedUserModel.accessToken = await _localStorage.GetItem<string>("token");
                     Contacts = await _contactService.GetContacts();
             }
-            else
-            {
-                isloggedIn = true;
-                user = await authenticationStateProvider.GetAuthenticationStateAsync();
-                authedUserModel.accessToken = await _localStorage.GetItem<string>("token");
-                bool lastLoginFailed = authedUserModel.accessToken == null;
-                if (!lastLoginFailed)
-                    Contacts = await _contactService.GetContacts();
-            }
+            // else
+            // {
+                
+            //     user = await authenticationStateProvider.GetAuthenticationStateAsync();
+            //     authedUserModel.accessToken = await _localStorage.GetItem<string>("token");
+            //     bool lastLoginFailed = authedUserModel.accessToken == null;
+            //     if (!lastLoginFailed)
+            //         isloggedIn = true;
+            //         Contacts = await _contactService.GetContacts();
+            // }
         }
         catch (Exception ex)
         {

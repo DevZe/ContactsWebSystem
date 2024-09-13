@@ -24,13 +24,23 @@ namespace ContactsApp.Helpers
         {
 
             var identity = new ClaimsIdentity();
-            token = (await _localStorage.GetItem<string>("token")) ?? _authuserModel.accessToken;
+
+            token = _authuserModel.accessToken;
+            if (token == null)
+            {
+                token = await _localStorage.GetItem<string>("token");
+                _authuserModel.accessToken = token;
+            }
+            else
+            {
+                await _localStorage.SetItem<string>("token", token);
+            }
 
             if (token != null)
             {
                 identity = new ClaimsIdentity(JwtParser.ParseJwtToken(_authuserModel.accessToken ?? token), "jwt");
-                await _localStorage.SetItem<string>("token", token);
-                _authuserModel.accessToken = token;
+                //await _localStorage.SetItem<string>("token", token);
+
 
             }
             var user = new ClaimsPrincipal(identity);

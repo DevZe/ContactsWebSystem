@@ -1,7 +1,7 @@
 ﻿@page "/login"
 
 
-@inject CustomAuthenticationStateProvider CustomAuthProvider
+@inject CustomAuthenticationStateProvider customAuthProvider
 @inject IAuthenticationService authEndPoint
 @inject NavigationManager NavManager
 @inject AuthenticatedUserModel loggedUser
@@ -109,8 +109,7 @@
     private string? returnUrl;
     bool lastLoginFailed;
 
-    [CascadingParameter]
-    private Task AuthenticationState { get; set; }
+
     [Parameter]
     [SupplyParameterFromQuery(Name = "returnUrl")]
     public string ReturnUrl
@@ -144,10 +143,17 @@
                 if (!lastLoginFailed)
                 {
                     IsLoggedIn = true;
+                    var state = await customAuthProvider?.GetAuthenticationStateAsync();
+                    await InvokeAsync(StateHasChanged);
                     await _localStorage.SetItem<string>("token",authedUser.accessToken);
-                    //CustomAuthProvider.AuthenticationStateChanged -= AuthenticationStateChangedHandler;
-                    StateHasChanged();
-                    NavManager.NavigateTo("/");
+                    if (state != null && state.User.Identity.IsAuthenticated)
+                    {
+                        if (string.IsNullOrEmpty(returnUrl))
+                        {
+                            returnUrl = "contacts-manager";
+                        }
+                        NavManager.NavigateTo(returnUrl);
+                    }
                 }
                 IsLoading = false;
             }
