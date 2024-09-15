@@ -5,38 +5,27 @@
 
     <div class="top-row ps-3 navbar navbar-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="">Contacts App</a>
+        <a class="navbar-brand" href="/contacts-manager">Contacts App</a>
             <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
         </div>
     </div>
-
-    <AuthorizeView>
-    <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+     <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
         <nav class="flex-column">
             <div class="nav-item px-3">
-
-                <NavLink class="nav-link" href="/contact-manager" Match="NavLinkMatch.All">
-                    <span class="oi oi-people" aria-hidden="true"></span> Manage Contacts
+                <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                    <span class="oi oi-account-logout" aria-hidden="true"></span> LogOut
                 </NavLink>
-                
             </div>
 
         </nav>
     </div>
+    
 
-    <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-        <nav class="flex-column">
-            <div class="nav-item px-3">
-                <div class="top-row px-4">
-                    <button @onclick="@(logOut)" target="_blank">Log Out</button>
-                </div>
-            </div>
 
-        </nav>
-    </div>
-</AuthorizeView>
+   
+
 
 @code {
     private bool collapseNavMenu = true;

@@ -1,5 +1,5 @@
 ﻿@page "/login"
-
+@layout AuthLayout
 
 @inject CustomAuthenticationStateProvider customAuthProvider
 @inject IAuthenticationService authEndPoint
@@ -7,6 +7,7 @@
 @inject AuthenticatedUserModel loggedUser
 @inject IConfiguration _config
 @inject ILocalStorageService _localStorage
+
 <head>
     <link rel="stylesheet" href="css/login.css" />
 </head>

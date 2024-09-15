@@ -3,121 +3,131 @@
 @using ContactsAppLibrary.Services.Models
 @inject IContactsEndPoint _contactEndPoint
 @inject NavigationManager NavManager
-@inject AuthenticationStateProvider authStateProvider
+@inject CustomAuthenticationStateProvider authStateProvider
+
 <head>
     <link rel="stylesheet" href="css/login.css" />
 </head>
 
-<EditForm Model="Contact" OnValidSubmit="Create">
+<Popup @ref="popupReference" />
 
-    @if (Error != null)
-    {
-        <p class="text-danger">@Error</p>
-    }
-    <DataAnnotationsValidator />
+@if (IsLoading)
+{
+    <p>Loading...</p>
+}
+else if (IsCreated)
+{
+    //This is empty due to the Popup displayed
+}
+else
+{
    
-    <div class="container">
-        <label for="uname"><b>Name</b></label>
-        <input type="text" @bind-value="Contact.Name" placeholder="Enter Username" name="uname" required>
-    </div>
+    <EditForm Model="Contact" OnValidSubmit="Create">
+
+        @if (Errors != null && Errors.Count> 0 )
+        {
+            foreach(string error in Errors)
+            {
+                <p class="text-danger">@error</p>
+            }
+        }
+        <DataAnnotationsValidator />
+   
+        <div class="container">
+            <label for="uname"><b>Name</b></label>
+            <input type="text" @bind-value="Contact.Name" placeholder="Name" name="uname" required>
+        </div>
 
 
 
-    <div class="container">
-        <label for="uname"><b>Email</b></label>
-        <input type="text" @bind-value="Contact.Email" placeholder="Enter Username" name="uname" required>
-    </div>
+        <div class="container">
+            <label for="uname"><b>Email</b></label>
+            <input type="text" @bind-value="Contact.Email" placeholder="Email" name="uname" required>
+        </div>
 
-    <div class="container">
-        <label for="uname"><b>Phone Number</b></label>
-        <input type="text" @bind-value="Contact.PhoneNumber" placeholder="Enter Username" name="uname" required>
-    </div>
+        <div class="container">
+            <label for="uname"><b>Phone Number</b></label>
+            <input type="text" @bind-value="Contact.PhoneNumber" placeholder="Phone Number" name="uname" required>
+        </div>
 
-    <div class="container">
-        <label for="uname"><b>Street Number</b></label>
-        <input type="text" @bind-value="Contact.Address.StreetNumber" placeholder="Enter Street Number" name="uname" required>
-    </div>
+        <div class="container">
+            <label for="uname"><b>Street Number</b></label>
+            <input type="text" @bind-value="Contact.Address.StreetNumber" placeholder="Street Number" name="uname" required>
+        </div>
 
-    <div class="container">
-        <label for="uname"><b>Street Name</b></label>
-        <input type="text" @bind-value="Contact.Address.StreetName" placeholder="Enter Street Name" name="uname" required>
-    </div>
+        <div class="container">
+            <label for="uname"><b>Street Name</b></label>
+            <input type="text" @bind-value="Contact.Address.StreetName" placeholder="Street Name" name="uname" required>
+        </div>
 
-    <div class="container">
-        <label for="uname"><b>Suburb</b></label>
-        <input type="text" @bind-value="Contact.Address.Suburb" placeholder="Enter Suburb" name="uname" required>
-    </div>
+        <div class="container">
+            <label for="uname"><b>Suburb</b></label>
+            <input type="text" @bind-value="Contact.Address.Suburb" placeholder="Suburb" name="uname" required>
+        </div>
 
-    <div class="container">
-        <label for="uname"><b>City</b></label>
-        <input type="text" @bind-value="Contact.Address.City" placeholder="Enter City" name="uname" required>
-    </div>
+        <div class="container">
+            <label for="uname"><b>City</b></label>
+            <input type="text" @bind-value="Contact.Address.City" placeholder="City" name="uname" required>
+        </div>
 
-    <div class="container">
-        <label for="uname"><b>Zip Code</b></label>
-        <input type="text" @bind-value="Contact.Address.ZipCode" placeholder="Enter UsernZip Codeame" name="uname" required>
-    </div>
+        <div class="container">
+            <label for="uname"><b>Zip Code</b></label>
+            <input type="text" @bind-value="Contact.Address.ZipCode" placeholder="Zip Code" name="uname" required>
+        </div>
 
-    <div class="container">
-        <label for="uname"><b>Province</b></label>
-        <input type="text" @bind-value="Contact.Address.Province" placeholder="Enter Province" name="uname" required>
-    </div>
+        <div class="container">
+            <label for="uname"><b>Province</b></label>
+            <input type="text" @bind-value="Contact.Address.Province" placeholder="Province" name="uname" required>
+        </div>
 
-    <div class="container">
-        <label for="uname"><b>Country</b></label>
-        <input type="text" @bind-value="Contact.Address.Country" placeholder="Enter Country" name="uname" required>
-    </div>
+        <div class="container">
+            <label for="uname"><b>Country</b></label>
+            <input type="text" @bind-value="Contact.Address.Country" placeholder="Country" name="uname" required>
+        </div>
 
-    <br/>
-    <div class="container" style="background-color:#f1f1f1">
-        <button type="submit" class="signupbtn">Create</button>
-        
-    </div>
-</EditForm>
+        <br/>
+        <div class="container" style="background-color:#f1f1f1">
+            <button type="submit" class="signupbtn">Create</button>
+        </div>
+    </EditForm>
+}
 @code {
-    ContactsModel? Contact = new ContactsModel();
+    private ContactsModel? Contact = new ContactsModel();
     private AuthenticationState user;
-    bool IsLoading;
+    private bool IsLoading,IsLoggedIn,IsCreated;
+    private List<string> Errors;
+    private Popup popupReference;
+
     protected override void OnInitialized()
     {
         Contact.Address = new AddressModel();
     }
 
-    string? Error; 
+    
+    //Create a new contact
     async Task Create()
     {
         try
         {
+            if (user == null)
+            {
+                user = await authStateProvider.GetAuthenticationStateAsync();
+            }
             if (user != null && user.User.Identity.IsAuthenticated)
             {
+                IsLoggedIn = true;
+                IsCreated = await _contactEndPoint.InsertContact(Contact);
 
-                IsLoading = true;
-                var isCreated = await _contactEndPoint.InsertContact(Contact);
-
-                if (isCreated)
+                if (IsCreated)
                 {
                     IsLoading = false;
-                    StateHasChanged();
-                    NavManager.NavigateTo("contacts-manager", true);
+                    popupReference.Show($"Great! You succesfully created  {Contact.Name}'s Contact", "Contact Creation Success","contacts-manager");
                 }
             }
-            else
-            {
-                IsLoading = true;
-                user = await authStateProvider.GetAuthenticationStateAsync();
-                var isCreated = await _contactEndPoint.InsertContact(Contact);
-
-                if (isCreated)
-                {
-                    IsLoading = false;
-                    StateHasChanged();
-                    NavManager.NavigateTo("contacts-manager", true);
-                }
-            }
-
+       
         }catch(Exception ex)
         {
-            Error = "Opps! there was an issue";
+            Errors.Add($"Opps! there was an issue creating a new contact: {ex.Message}");
         }
     }
 

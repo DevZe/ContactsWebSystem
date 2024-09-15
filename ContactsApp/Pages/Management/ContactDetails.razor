@@ -15,6 +15,9 @@
 @if(IsLoading)
 {
     <p>Loading...</p>
+}else if (IsUpdated)
+{
+    //Popup is displayed hence this is empty
 }
 else
 {
@@ -22,7 +25,6 @@ else
         <EditForm  Model="Contact" OnValidSubmit="Update">
         <div class="row sticky-top fixed-position bg-light">
             <div class="col-4">
-                <button class="btn btn-sm btn-dark" @onclick="@(()=> NavMan.NavigateTo("contacts-manager"))">Back to Contacts</button>
             </div>
             <div class="col-4">
                 <button type="submit" class="btn btn-sm btn-primary">Save changes</button>
@@ -156,8 +158,13 @@ else
             {
                 IsLoading = true;
                 IsUpdated = await _contactsEndPoint.UpdateContact(Contact);
-                popupReference.Show($"Great! You succesfully updated  {Contact.Name} Contact details","Update Success");
                 IsLoading = false;
+
+                if (IsUpdated)
+                {
+                    popupReference.Show($"Great! You succesfully updated  {Contact.Name} Contact details", "Update Success");
+                }
+               
 
             }
 

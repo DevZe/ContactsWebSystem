@@ -1,7 +1,15 @@
 ﻿@inject NavigationManager NavMan
+@inject IContactsEndPoint _contactService
+
 @{
     var showClass = IsVisible ? "d-block" : "d-none";
 }
+
+@if (!string.IsNullOrEmpty(Error))
+{
+    <p class="text-danger">@Error</p>  
+}
+
 
 <div class="toast-container p-3 @showClass" data-bs-autohide="true" data-bs-delay="5000">
     <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
@@ -13,6 +21,8 @@
         <div class="toast-body">
             @BodyText
         </div>
+
+        <button @onclick="@(()=>Delete())">Delete</button>
     </div>
 </div>
 
@@ -28,31 +38,56 @@
 
     [Parameter]
     public string? BodyText { get; set; }
-    private string? returnUrl;
+    private int contactId;
+    private string Error;
 
-    public void Show(string bodyText, string headerText = "", string? returnurl = "")
+    public void Show(string bodyText, string headerText = "", int id = 0)
     {
         HeaderText = headerText;
         BodyText = bodyText;
         IsVisible = true;
 
-        if (!string.IsNullOrEmpty(returnurl))
+        //provided that no id is 0
+        if (id > 0)
         {
-            returnUrl = returnurl;
+            contactId = id;
         }
         StateHasChanged();
     }
 
-    
+
     private void Close()
     {
         HeaderText = string.Empty;
         BodyText = string.Empty;
         IsVisible = false;
-        if (!string.IsNullOrEmpty(returnUrl))
-        {
-            NavMan.NavigateTo(returnUrl);
-        }
+        NavMan.NavigateTo("contacts-manager", true);
         StateHasChanged();
+        
+    }
+
+    //Delete the Contact 
+    private async Task Delete()
+    {
+        try
+        {
+            if (contactId > 0)
+            {
+                bool IsDeleted = await _contactService.DeleteContact(contactId);
+
+                if (IsDeleted)
+                {
+                    IsVisible = false;
+                    NavMan.NavigateTo("contacts-manager",true);
+                }
+
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Error = $"Opps! There was an error {ex.Message}";
+        }
+
     }
 }

@@ -23,6 +23,12 @@ namespace ContactsWebApi.Controllers
         public async Task<ActionResult<IEnumerable<ContactModel>>> GetContacts()
         {
             var contacts = await _context.Contacts.ToListAsync();
+            //This is a long way of getting Address of the contact, might have a better way
+            foreach (ContactModel contact in contacts)
+            {
+                contact.Address = await _context.Address.FirstOrDefaultAsync(i => i.Id == contact.Id);
+            }
+
             return contacts;
         }
 

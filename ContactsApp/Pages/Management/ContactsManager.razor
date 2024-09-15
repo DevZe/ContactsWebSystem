@@ -8,7 +8,6 @@
 @inject ILocalStorageService _localStorageService
 @inject AuthenticatedUserModel _authedModel
 @inject NavigationManager NavMan
-@inject IContactsEndPoint _contactsEndPoint
 @inject AuthenticatedUserModel authedUserModel
 @inject ILocalStorageService _localStorage
 
@@ -21,6 +20,8 @@
     <link rel="stylesheet" href="css/manager.css" />
 </head>
 <title>Manager</title>
+<Popup @ref="popupReference" />
+<DeleteContactPopup @ref="deleteContactPopup" />
 
 @if(Errors!=null && Errors.Count() > 0)
 {
@@ -34,6 +35,10 @@
 {
     <p>Loading</p>
 }
+else if (IsDeleting)
+{
+    //This will be empty because there is a Popup displayed
+}
 else
 {   
 
@@ -42,7 +47,7 @@ else
       
         <div class="col-4 m-2">
           
-                <button @onclick="AddContact"><span class="oi oi-plus" aria-hidden="true"></span></button>
+            <button @onclick="AddContact"><span class="oi oi-plus" aria-hidden="true"></span></button>
          
         </div>
         <div class="col-4">
@@ -89,7 +94,7 @@ else
                     </td>
 
                     <td>
-                        <button  @onclick="@(() =>Delete(contact.Id))" id="delete-btn" class="btn btn-danger">Delete</button>
+                        <button @onclick="@(() =>Delete(contact.Id))" class="btn btn-danger">Delete</button>
                     </td>
                 </tr>
             }
@@ -100,16 +105,29 @@ else
 }
 
 
-@code {
+<!-- Delete Modal -->
+<div id="deleteModal" class="modal">
 
+    <!-- Modal content -->
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <p class="text-danger">Are you sure you want to delete this modal?</p>
+        <button class="btn btn-sm btn-danger">Delete</button>
+    </div>
+
+</div>
+
+@code {
 
     private bool isloggedIn;
     private List<ContactsModel>? Contacts = new List<ContactsModel>();
     private List<string>? Errors = new List<string>();
-    private bool IsLoading;
-    AuthenticationState user;
+    private bool IsLoading,IsDeleting;
+    private AuthenticationState user;
+    private Popup popupReference;
+    private DeleteContactPopup deleteContactPopup;
+    private IJSObjectReference searchContactsObjectRef;
 
-    private IJSObjectReference contactsModule;
     protected override async Task OnInitializedAsync()
     {
 
@@ -141,8 +159,9 @@ else
             IsLoading = false;
 
 
-            contactsModule = await _jsRunTime.InvokeAsync<IJSObjectReference>("import", "/js/list-search.js");
-            await contactsModule.InvokeVoidAsync("addHandlers");
+            searchContactsObjectRef = await _jsRunTime.InvokeAsync<IJSObjectReference>("import", "/js/list-search.js");
+            await searchContactsObjectRef.InvokeVoidAsync("addHandlers");
+
         }
 
     }
@@ -163,25 +182,15 @@ else
             if(user!= null && user.User.Identity.IsAuthenticated)
             {
                 isloggedIn = true;
-                //authedUserModel.accessToken = await _localStorage.GetItem<string>("token");
-                    Contacts = await _contactService.GetContacts();
+                Contacts = await _contactService.GetContacts();
             }
-            // else
-            // {
-                
-            //     user = await authenticationStateProvider.GetAuthenticationStateAsync();
-            //     authedUserModel.accessToken = await _localStorage.GetItem<string>("token");
-            //     bool lastLoginFailed = authedUserModel.accessToken == null;
-            //     if (!lastLoginFailed)
-            //         isloggedIn = true;
-            //         Contacts = await _contactService.GetContacts();
-            // }
+
         }
         catch (Exception ex)
         {
             Errors.Add($"Opps! Something is wrong while getting Contacts: {ex.Message}");
         }
-       
+
     }
 
     //View for editing
@@ -191,16 +200,16 @@ else
         //NavMan.NavigateTo(NavMan.GetUriWithQueryParameter("contact-details",model.Id));
     }
 
+
+
     //Remove the contact from the db
-    async Task Delete(int id)
+    void Delete(int id)
     {
         try
         {
-            IsLoading = true;
-            await _contactsEndPoint.DeleteContact(id);
-            Contacts = await _contactService.GetContacts();
-            StateHasChanged();
-            IsLoading = false;
+            IsDeleting = true;
+            deleteContactPopup.Show("Are you sure you want to delete this contact?", "Contact Delete", id);
+            //IsLoading = false;
         }catch(Exception ex)
         {
             Errors.Add($"Opps! There was an error {ex.Message}");
@@ -214,18 +223,11 @@ else
         NavMan.NavigateTo("create",true);
     }
 
-    //Invoke the JS method as a blazor method
-    async Task search()
-    {
-       
-    }
-    
-
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        if (contactsModule is not null)
+        if (searchContactsObjectRef is not null)
         {
-            await contactsModule.DisposeAsync();
+            await searchContactsObjectRef.DisposeAsync();
         }
     }
 }

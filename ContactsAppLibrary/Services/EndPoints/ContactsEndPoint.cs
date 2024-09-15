@@ -68,15 +68,25 @@ namespace ContactsAppLibrary.Services.EndPoints
         }
 
         //Deleting the Contact
-        public async Task DeleteContact(int id)
+        public async Task<bool> DeleteContact(int id)
         {
             try
             {
+                HttpResponseMessage response = null;
                 if (_authedModel != null && _authedModel.accessToken != null)
                 {
                     result = new HttpResponseMessage();
                     _apiClient.InitializeClient(_authedModel.accessToken);
-                    var httpResponseMessage = await _apiClient.ApiClient.DeleteAsync($"/api/Contacts?Id={id}");
+                    response = await _apiClient.ApiClient.DeleteAsync($"/api/Contacts?Id={id}");
+                }
+
+                if (response != null && response.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
             catch (Exception ex)
