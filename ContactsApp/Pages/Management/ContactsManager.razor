@@ -40,10 +40,10 @@ else if (IsDeleting)
     //This will be empty because there is a Popup displayed
 }
 else
-{   
+{
+    <button id="goToTopBtn" title="Go to top">Top</button>
 
-    
-    <div class="row sticky-top fixed-position bg-light p-2">
+    <div class="row sticky-top fixed-position bg-light p-2 ">
       
         <div class="col-4 m-2">
           
@@ -56,8 +56,7 @@ else
         <div class="col-4">
         </div>
     </div>
-    <br/>
-    <hr/>
+    
     <table id="contactsTable">
         <tr class="header">
             <th style="width:60%;">Name</th>
@@ -77,13 +76,12 @@ else
                     <td>@contact.Name</td>
                     <td>@contact.PhoneNumber</td>
                     <td>@contact.Email</td>
-                    <td>
+                    <td class="w-100">
                     @if(contact.Address != null)
                     {
-                        <p>
-                            @contact.Address.StreetNumber;  @contact.Address.StreetName; 
-                            @contact.Address.City @contact.Address.Province,
-                            @contact.Address.Country @contact.Address.ZipCode
+                        <p class="vw-60">
+                             @contact.Address.StreetNumber  @contact.Address.StreetName, @contact.Address.Suburb @contact.Address.City, @contact.Address.Province
+                             @contact.Address.Country, @contact.Address.ZipCode
                         </p>
                        
                     }
@@ -126,7 +124,7 @@ else
     private AuthenticationState user;
     private Popup popupReference;
     private DeleteContactPopup deleteContactPopup;
-    private IJSObjectReference searchContactsObjectRef;
+    private IJSObjectReference searchContactsObjectRef,gotoTopObjectRef;
 
     protected override async Task OnInitializedAsync()
     {
@@ -161,6 +159,9 @@ else
 
             searchContactsObjectRef = await _jsRunTime.InvokeAsync<IJSObjectReference>("import", "/js/list-search.js");
             await searchContactsObjectRef.InvokeVoidAsync("addHandlers");
+
+            gotoTopObjectRef = await _jsRunTime.InvokeAsync<IJSObjectReference>("import", "/js/back-to-top.js");
+            await gotoTopObjectRef.InvokeVoidAsync("goToTop");
 
         }
 

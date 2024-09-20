@@ -21,17 +21,18 @@
 }
 else
 {
-
         <EditForm  Model="Contact" OnValidSubmit="Update">
-        <div class="row sticky-top fixed-position bg-light">
-            <div class="col-4">
+            <div class="row sticky-top fixed-position bg-light">
+                <div class="col-4">
+                </div>
+                <div class="col-4">
+                    <button type="submit" class="btn btn-primary m-2 align-content-lg-start">
+                     <span class="oi oi-file" aria-hidden="true"></span>Save changes
+                    </button>
+                </div>
+                <div class="col-4">
+                </div>
             </div>
-            <div class="col-4">
-                <button type="submit" class="btn btn-sm btn-primary">Save changes</button>
-            </div>
-            <div class="col-4">
-            </div>
-        </div>
             <DataAnnotationsValidator />
            <ValidationSummary/>
             <div class="container">

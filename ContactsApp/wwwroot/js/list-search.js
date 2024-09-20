@@ -1,7 +1,8 @@
-﻿//Search the input
+﻿
+//Search the input
 export function addHandlers() {
-    const btn = document.getElementById("searchInput");
-    btn.addEventListener("change", search);
+    const input = document.getElementById("searchInput");
+    input.addEventListener("keyup", search);
 }
 
 export function search() {

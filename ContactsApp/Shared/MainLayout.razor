@@ -20,22 +20,7 @@
     </main>
 </div>
 @code{
-    
-    bool IsLoggeIn;
-    bool Connecting;
-    List<string> Errors;
-    bool IsLoggedIn;
-
-    public async Task OnInitialiseAsync()
-    {
-
-        var state = authenticationStateProvider.GetAuthenticationStateAsync();
-        if ((await state).User.Identity.IsAuthenticated)
-        {
-            IsLoggedIn = true;
-        }
-    }
-
+   
     
 }
 
